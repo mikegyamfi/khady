@@ -5,10 +5,15 @@ from decouple import config
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 import requests
+from tablib import Dataset
+
 from . import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from . import helper, models
+from .forms import UploadFileForm
+from .resource import CustomUserResource
+
 
 # Create your views here.
 def home(request):
@@ -374,4 +379,27 @@ def credit_user_from_list(request, reference):
         messages.success(request, f"{user} has been credited with {amount}")
         return redirect('topup_list')
 
+
+def import_users(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            file = request.FILES['file']
+            if not file.name.endswith('.xlsx'):
+                messages.error(request, 'Please upload a valid Excel file.')
+                return render(request, 'import_users.html', {'form': form})
+
+            dataset = Dataset()
+            imported_data = dataset.load(file.read(), format='xlsx')
+            resource = CustomUserResource()
+            result = resource.import_data(imported_data, dry_run=True)  # Perform a dry run to validate data
+
+            if result.has_errors():
+                messages.error(request, 'There were errors importing the data. Please check the file and try again.')
+            else:
+                resource.import_data(imported_data, dry_run=False)  # Import the data into the CustomUser model
+                messages.success(request, 'User data imported successfully.')
+    else:
+        form = UploadFileForm()
+    return render(request, 'layouts/import_users.html', {'form': form})
 

@@ -54,3 +54,9 @@ class CreditUserForm(forms.Form):
     user = forms.ModelChoiceField(queryset=models.CustomUser.objects.all().order_by('username'), to_field_name='username', empty_label=None,
                                   widget=forms.Select(attrs={'class': 'form-control airtime-input'}))
     amount = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'GHS 100'}))
+
+
+class UploadFileForm(forms.Form):
+    file = forms.FileField(label='Select an Excel file', help_text='Allowed file formats: .xlsx')
+
+
