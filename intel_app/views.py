@@ -429,7 +429,7 @@ def populate_custom_users_from_excel(request):
                     phone=row['phone'],
                     wallet=row['wallet'],
                     status=row['status'],
-                    user_id=row['id'],
+                    id=row['id'],
                     password1=row['password1'],
                     password2=row['password2'],
                     last_login=row['last_login'],
