@@ -29,7 +29,7 @@ SECRET_KEY = config("SECRET_KEY")
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'www.ghbays.com'
+    'www.ghbays.com',
     'gh-bay-mttrt.ondigitalocean.app',
     '127.0.0.1'
 ]
