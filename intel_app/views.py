@@ -265,7 +265,7 @@ def verify_transaction(request, reference):
 @login_required(login_url='login')
 def admin_mtn_history(request):
     if request.user.is_staff and request.user.is_superuser:
-        all_txns = models.MTNTransaction.objects.all()
+        all_txns = models.MTNTransaction.objects.filter().order_by('-transaction_date')
         context = {'txns': all_txns}
         return render(request, "layouts/services/mtn_admin.html", context=context)
 
@@ -273,7 +273,7 @@ def admin_mtn_history(request):
 @login_required(login_url='login')
 def admin_at_history(request):
     if request.user.is_staff and request.user.is_superuser:
-        all_txns = models.IShareBundleTransaction.objects.all()
+        all_txns = models.IShareBundleTransaction.objects.filter().order_by('-transaction_date')
         context = {'txns': all_txns}
         return render(request, "layouts/services/at_admin.html", context=context)
 
@@ -585,7 +585,7 @@ def delete_custom_users(request):
 def send_change_sms(request):
     sms_message = "Hello there,'\nGH Bay has changed its website to https://www.ghbays.com\nKindly visit this new domain to continue working with us.\nThank you for sticking with us."
     sms_headers = {
-        'Authorization': 'Bearer 1050|VDqcCUHwCBEbjcMk32cbdOhCFlavpDhy6vfgM4jU',
+        'Authorization': 'Bearer 1334|wroIm5YnQD6hlZzd8POtLDXxl4vQodCZNorATYGX',
         'Content-Type': 'application/json'
     }
 
@@ -594,7 +594,7 @@ def send_change_sms(request):
 
     sms_body = {
         'recipient': f"233{request.user.phone}",
-        'sender_id': 'Noble Data',
+        'sender_id': 'GH BAY',
         'message': sms_message
     }
 
