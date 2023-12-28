@@ -444,14 +444,14 @@ def populate_custom_users_from_excel(request):
                 # Save the CustomUser instance to the database
                 custom_user.save()
 
-                group_names = row['groups'].split(',')  # Assuming groups are comma-separated
-                groups = Group.objects.filter(name__in=group_names)
-                custom_user.groups.set(groups)
-
-                if row['user_permissions']:
-                    permission_ids = [int(pid) for pid in row['user_permissions'].split(',')]
-                    permissions = Permission.objects.filter(id__in=permission_ids)
-                    custom_user.user_permissions.set(permissions)
+                # group_names = row['groups'].split(',')  # Assuming groups are comma-separated
+                # groups = Group.objects.filter(name__in=group_names)
+                # custom_user.groups.set(groups)
+                #
+                # if row['user_permissions']:
+                #     permission_ids = [int(pid) for pid in row['user_permissions'].split(',')]
+                #     permissions = Permission.objects.filter(id__in=permission_ids)
+                #     custom_user.user_permissions.set(permissions)
                 print("killed")
                 counter = counter+1
             messages.success(request, 'All done')
