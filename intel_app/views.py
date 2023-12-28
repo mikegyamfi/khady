@@ -3,6 +3,7 @@ from datetime import datetime
 
 import pandas as pd
 from decouple import config
+from django.contrib.auth.models import Group
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 import requests
@@ -433,7 +434,6 @@ def populate_custom_users_from_excel(request):
                     password2=row['password2'],
                     last_login=row['last_login'],
                     is_superuser=row['is_superuser'],
-                    groups=row['groups'],
                     user_permissions=row['user_permissions'],
                     is_staff=row['is_staff'],
                     is_active=row['is_active'],
@@ -444,6 +444,10 @@ def populate_custom_users_from_excel(request):
 
                 # Save the CustomUser instance to the database
                 custom_user.save()
+
+                group_names = row['groups'].split(',')  # Assuming groups are comma-separated
+                groups = Group.objects.filter(name__in=group_names)
+                custom_user.groups.set(groups)
                 print("killed")
                 counter = counter+1
             messages.success(request, 'All done')
