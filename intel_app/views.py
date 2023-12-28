@@ -596,7 +596,7 @@ def send_change_sms(request):
 
     for user in all_users:
         sleep(1)
-        sms_message = f"Hello {user.username},'\nGH Bay has changed its website to https://www.ghbays.com\nYou do not need to create a new account for this. Just log in and start transacting\nAll wallet balance are intact."
+        sms_message = f"Hello {user.username},\nGH Bay has changed its website to https://www.ghbays.com\nYou do not need to create a new account for this. Just log in and start transacting\nAll wallet balance are intact."
 
         sms_body = {
             'recipient': f"233{user.phone}",
