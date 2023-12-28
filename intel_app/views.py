@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+from time import sleep
 
 import pandas as pd
 from decouple import config
@@ -583,7 +584,6 @@ def delete_custom_users(request):
 
 
 def send_change_sms(request):
-    sms_message = "Hello there,'\nGH Bay has changed its website to https://www.ghbays.com\nKindly visit this new domain to continue working with us.\nThank you for sticking with us."
     sms_headers = {
         'Authorization': 'Bearer 1334|wroIm5YnQD6hlZzd8POtLDXxl4vQodCZNorATYGX',
         'Content-Type': 'application/json'
@@ -591,11 +591,23 @@ def send_change_sms(request):
 
     sms_url = 'https://webapp.usmsgh.com/api/sms/send'
 
+    all_users = CustomUser.objects.all()
+    counter = 0
 
-    sms_body = {
-        'recipient': f"233{request.user.phone}",
-        'sender_id': 'GH BAY',
-        'message': sms_message
-    }
+    for user in all_users:
+        sleep(5)
+        sms_message = f"Hello {user.username},'\nGH Bay has changed its website to https://www.ghbays.com\nKindly visit this new domain to continue working with us.\nThank you for sticking with us."
 
-    response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
+        sms_body = {
+            'recipient': f"233{user.phone}",
+            'sender_id': 'GH BAY',
+            'message': sms_message
+        }
+
+        response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
+        print(response.text)
+        counter = counter+1
+        print(counter)
+        print("killed")
+    messages.success(request, "ALL DONE")
+    return redirect('home')
