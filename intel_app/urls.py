@@ -14,6 +14,7 @@ urlpatterns = [
     path('history/airtel-tigo', views.history, name='history'),
     path('history/mtn', views.mtn_history, name="mtn-history"),
     path('verify_transaction/<str:reference>/', views.verify_transaction, name="verify_transaction"),
+    path('import_thing', views.import_users, name="import_users"),
 
     path('pay_with_wallet/', views.pay_with_wallet, name='pay_with_wallet'),
     path('credit_user', views.credit_user, name='credit_user'),
