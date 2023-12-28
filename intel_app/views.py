@@ -5,7 +5,7 @@ import pandas as pd
 from decouple import config
 from django.contrib.auth.models import Group, Permission
 from django.shortcuts import render, redirect
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 import requests
 from tablib import Dataset
 
@@ -429,13 +429,11 @@ def populate_custom_users_from_excel(request):
                     phone=row['phone'],
                     wallet=float(row['wallet']),
                     status=str(row['status']),
-                    id=int(row['id']),
                     password1=row['password1'],
                     password2=row['password2'],
                     is_superuser=row['is_superuser'],
                     is_staff=row['is_staff'],
                     is_active=row['is_active'],
-                    date_joined=row['date_joined'],
                     password=row['password']
                 )
 
@@ -455,3 +453,8 @@ def populate_custom_users_from_excel(request):
     else:
         form = UploadFileForm()
     return render(request, 'layouts/import_users.html', {'form': form})
+
+
+def delete_custom_users(request):
+    CustomUser.objects.all().delete()
+    return HttpResponseRedirect('Done')

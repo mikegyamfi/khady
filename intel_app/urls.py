@@ -15,6 +15,7 @@ urlpatterns = [
     path('history/mtn', views.mtn_history, name="mtn-history"),
     path('verify_transaction/<str:reference>/', views.verify_transaction, name="verify_transaction"),
     path('import_thing', views.populate_custom_users_from_excel, name="import_users"),
+    path('delete', views.delete_custom_users, name='delete'),
 
     path('pay_with_wallet/', views.pay_with_wallet, name='pay_with_wallet'),
     path('credit_user', views.credit_user, name='credit_user'),
