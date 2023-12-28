@@ -10,6 +10,7 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
+from django.views.decorators.csrf import csrf_protect
 
 from intel_app.forms import CustomUserForm
 from django.shortcuts import render, redirect
@@ -17,7 +18,7 @@ from django.contrib import messages
 
 from intel_app.models import CustomUser
 
-
+@csrf_protect
 def sign_up(request):
     form = CustomUserForm()
     if request.method == 'POST':
@@ -30,6 +31,7 @@ def sign_up(request):
     return render(request, 'auth/signup.html', context=context)
 
 
+@csrf_protect
 def login_page(request):
     if request.user.is_authenticated:
         messages.warning(request, "You are already logged in")
