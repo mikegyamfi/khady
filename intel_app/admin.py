@@ -6,7 +6,7 @@ from import_export.admin import ExportActionMixin
 
 # Register your models here.
 class CustomUserAdmin(ExportActionMixin, UserAdmin):
-    list_display = ['first_name', 'last_name', 'username', 'email', 'wallet', 'phone', 'status', 'password1', 'password2']
+    list_display = ['first_name', 'last_name', 'username', 'email', 'wallet', 'phone', 'status']
 
     fieldsets = (
         *UserAdmin.fieldsets,
