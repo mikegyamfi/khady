@@ -300,6 +300,7 @@ def mark_as_sent(request, pk):
         }
         # response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
         # print(response.text)
+        messages.success(request, f"Transaction Completed")
         return redirect('mtn_admin')
 
 
@@ -325,6 +326,7 @@ def at_mark_as_sent(request, pk):
         }
         # response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
         # print(response.text)
+        messages.success(request, f"Transaction Completed")
         return redirect('at_admin')
 
 
