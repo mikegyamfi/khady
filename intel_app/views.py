@@ -421,7 +421,7 @@ def populate_custom_users_from_excel(request):
             for index, row in df.iterrows():
                 print(counter)
                 # Create a CustomUser instance for each row
-                custom_user = CustomUser(
+                custom_user = CustomUser.objects.create(
                     first_name=row['first_name'],
                     last_name=row['last_name'],
                     username=row['username'],
@@ -438,10 +438,8 @@ def populate_custom_users_from_excel(request):
                     is_active=row['is_active'],
                     date_joined=row['date_joined'],
                     password=row['password']
-                    # ... add other fields as needed
                 )
 
-                # Save the CustomUser instance to the database
                 custom_user.save()
 
                 # group_names = row['groups'].split(',')  # Assuming groups are comma-separated
