@@ -46,7 +46,8 @@
           <a href="#" class="btn btn-outline rounded-pill dropdown-toggle" data-toggle="dropdown" aria-expanded="false">{{request.user}}</a>
             <div class="dropdown-menu">
                 <a class="dropdown-item" href="{% url 'logout' %}">Log out</a>
-                <a class="dropdown-item" href="{% url 'history' %}">Dashboard</a>
+                <a class="dropdown-item" href="{% url 'mtn_admin' %}">MTN Admin</a>
+              <a class="dropdown-item" href="{% url 'at_admin' %}">AT Admin</a>
             </div>
           </div>  
         </div>

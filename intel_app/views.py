@@ -58,7 +58,7 @@ def pay_with_wallet(request):
             bundle_number=phone_number,
             offer=f"{bundle}MB",
             reference=reference,
-            transaction_status="Completed"
+            transaction_status="Pending"
         )
         new_transaction.save()
         user.wallet -= float(amount)
@@ -191,7 +191,7 @@ def mtn(request):
             reference=payment_reference,
             amount=amount_paid,
             transaction_date=datetime.now(),
-            transaction_status="Completed"
+            transaction_status="Pending"
         )
         new_payment.save()
         phone_number = request.POST.get("phone")
@@ -260,6 +260,72 @@ def verify_transaction(request, reference):
         except:
             status = data["status"]
         return JsonResponse({'status': status})
+
+
+@login_required(login_url='login')
+def admin_mtn_history(request):
+    if request.user.is_staff and request.user.is_superuser:
+        all_txns = models.MTNTransaction.objects.all()
+        context = {'txns': all_txns}
+        return render(request, "layouts/services/mtn_admin.html", context=context)
+
+
+@login_required(login_url='login')
+def admin_at_history(request):
+    if request.user.is_staff and request.user.is_superuser:
+        all_txns = models.IShareBundleTransaction.objects.all()
+        context = {'txns': all_txns}
+        return render(request, "layouts/services/at_admin.html", context=context)
+
+
+@login_required(login_url='login')
+def mark_as_sent(request, pk):
+    if request.user.is_staff and request.user.is_superuser:
+        txn = models.MTNTransaction.objects.filter(id=pk).first()
+        print(txn)
+        txn.transaction_status = "Completed"
+        txn.save()
+        sms_headers = {
+            'Authorization': 'Bearer 1050|VDqcCUHwCBEbjcMk32cbdOhCFlavpDhy6vfgM4jU',
+            'Content-Type': 'application/json'
+        }
+
+        sms_url = 'https://webapp.usmsgh.com/api/sms/send'
+        sms_message = f"Your account has been credited with {txn.offer}.\nTransaction Reference: {txn.reference}"
+
+        sms_body = {
+            'recipient': f"233{txn.bundle_number}",
+            'sender_id': 'Noble Data',
+            'message': sms_message
+        }
+        # response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
+        # print(response.text)
+        return redirect('mtn_admin')
+
+
+@login_required(login_url='login')
+def at_mark_as_sent(request, pk):
+    if request.user.is_staff and request.user.is_superuser:
+        txn = models.IShareBundleTransaction.objects.filter(id=pk).first()
+        print(txn)
+        txn.transaction_status = "Completed"
+        txn.save()
+        sms_headers = {
+            'Authorization': 'Bearer 1050|VDqcCUHwCBEbjcMk32cbdOhCFlavpDhy6vfgM4jU',
+            'Content-Type': 'application/json'
+        }
+
+        sms_url = 'https://webapp.usmsgh.com/api/sms/send'
+        sms_message = f"Your account has been credited with {txn.offer}.\nTransaction Reference: {txn.reference}"
+
+        sms_body = {
+            'recipient': f"233{txn.bundle_number}",
+            'sender_id': 'Noble Data',
+            'message': sms_message
+        }
+        # response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
+        # print(response.text)
+        return redirect('at_admin')
 
 
 @login_required(login_url='login')
@@ -383,6 +449,60 @@ def credit_user_from_list(request, reference):
         return redirect('topup_list')
 
 
+@login_required(login_url='login')
+def at_mark_completed(request, reference):
+    if request.user.is_superuser:
+        txn = models.IShareBundleTransaction.objects.filter(reference=reference).first()
+        if txn:
+            txn.transaction_status = "Completed"
+            txn.save()
+
+        # sms_headers = {
+        #     'Authorization': 'Bearer 1320|DMvAzhkgqCGgsuDs6DHcTKnt8xcrFnD48HEiRbvr',
+        #     'Content-Type': 'application/json'
+        # }
+        #
+        # sms_url = 'https://webapp.usmsgh.com/api/sms/send'
+        # sms_message = f"Hello,\nYour wallet has been topped up with GHS{amount}.\nReference: {reference}.\nThank you"
+        #
+        # sms_body = {
+        #     'recipient': f"233{custom_user.phone}",
+        #     'sender_id': 'DATASTOREGH',
+        #     'message': sms_message
+        # }
+        # response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
+        # print(response.text)
+        messages.success(request, f"Transaction Completed")
+        return redirect('history')
+
+
+@login_required(login_url='login')
+def mtn_mark_completed(request, reference):
+    if request.user.is_superuser:
+        txn = models.MTNTransaction.objects.filter(reference=reference).first()
+        if txn:
+            txn.transaction_status = "Completed"
+            txn.save()
+
+        # sms_headers = {
+        #     'Authorization': 'Bearer 1320|DMvAzhkgqCGgsuDs6DHcTKnt8xcrFnD48HEiRbvr',
+        #     'Content-Type': 'application/json'
+        # }
+        #
+        # sms_url = 'https://webapp.usmsgh.com/api/sms/send'
+        # sms_message = f"Hello,\nYour wallet has been topped up with GHS{amount}.\nReference: {reference}.\nThank you"
+        #
+        # sms_body = {
+        #     'recipient': f"233{custom_user.phone}",
+        #     'sender_id': 'DATASTOREGH',
+        #     'message': sms_message
+        # }
+        # response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
+        # print(response.text)
+        messages.success(request, f"Transaction Completed")
+        return redirect('mtn_history')
+
+
 # def import_users(request):
 #     if request.method == 'POST':
 #         form = UploadFileForm(request.POST, request.FILES)
@@ -458,3 +578,22 @@ def populate_custom_users_from_excel(request):
 def delete_custom_users(request):
     CustomUser.objects.all().delete()
     return HttpResponseRedirect('Done')
+
+
+def send_change_sms(request):
+    sms_message = "Hello there,'\nGH Bay has changed its website to https://www.ghbays.com\nKindly visit this new domain to continue working with us.\nThank you for sticking with us."
+    sms_headers = {
+        'Authorization': 'Bearer 1050|VDqcCUHwCBEbjcMk32cbdOhCFlavpDhy6vfgM4jU',
+        'Content-Type': 'application/json'
+    }
+
+    sms_url = 'https://webapp.usmsgh.com/api/sms/send'
+
+
+    sms_body = {
+        'recipient': f"233{request.user.phone}",
+        'sender_id': 'Noble Data',
+        'message': sms_message
+    }
+
+    response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
