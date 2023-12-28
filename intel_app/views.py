@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 
+import pandas as pd
 from decouple import config
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
@@ -12,6 +13,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from . import helper, models
 from .forms import UploadFileForm
+from .models import CustomUser
 from .resource import CustomUserResource
 
 
@@ -380,26 +382,71 @@ def credit_user_from_list(request, reference):
         return redirect('topup_list')
 
 
-def import_users(request):
+# def import_users(request):
+#     if request.method == 'POST':
+#         form = UploadFileForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             file = request.FILES['file']
+#             if not file.name.endswith('.xlsx'):
+#                 messages.error(request, 'Please upload a valid Excel file.')
+#                 return render(request, 'import_users.html', {'form': form})
+#
+#             dataset = Dataset()
+#             imported_data = dataset.load(file.read(), format='xlsx')
+#             resource = CustomUserResource()
+#             result = resource.import_data(imported_data, dry_run=True)  # Perform a dry run to validate data
+#
+#             if result.has_errors():
+#                 messages.error(request, 'There were errors importing the data. Please check the file and try again.')
+#             else:
+#                 resource.import_data(imported_data, dry_run=False)  # Import the data into the CustomUser model
+#                 messages.success(request, 'User data imported successfully.')
+#     else:
+#         form = UploadFileForm()
+#     return render(request, 'layouts/import_users.html', {'form': form})
+
+
+def populate_custom_users_from_excel(request):
+    # Read the Excel file using pandas
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
-            file = request.FILES['file']
-            if not file.name.endswith('.xlsx'):
-                messages.error(request, 'Please upload a valid Excel file.')
-                return render(request, 'import_users.html', {'form': form})
+            excel_file = request.FILES['file']
 
-            dataset = Dataset()
-            imported_data = dataset.load(file.read(), format='xlsx')
-            resource = CustomUserResource()
-            result = resource.import_data(imported_data, dry_run=True)  # Perform a dry run to validate data
+            # Process the uploaded Excel file
+            df = pd.read_excel(excel_file)
+            counter = 0
+            # Iterate through rows to create CustomUser instances
+            for index, row in df.iterrows():
+                print(counter)
+                # Create a CustomUser instance for each row
+                custom_user = CustomUser(
+                    first_name=row['first_name'],
+                    last_name=row['last_name'],
+                    username=row['username'],
+                    email=row['email'],
+                    phone=row['phone'],
+                    wallet=row['wallet'],
+                    status=row['status'],
+                    user_id=row['id'],
+                    password1=row['password1'],
+                    password2=row['password2'],
+                    last_login=row['last_login'],
+                    is_superuser=row['is_superuser'],
+                    groups=row['groups'],
+                    user_permissions=row['user_permissions'],
+                    is_staff=row['is_staff'],
+                    is_active=row['is_active'],
+                    date_joined=row['date_joined'],
+                    password=row['password']
+                    # ... add other fields as needed
+                )
 
-            if result.has_errors():
-                messages.error(request, 'There were errors importing the data. Please check the file and try again.')
-            else:
-                resource.import_data(imported_data, dry_run=False)  # Import the data into the CustomUser model
-                messages.success(request, 'User data imported successfully.')
+                # Save the CustomUser instance to the database
+                custom_user.save()
+                print("killed")
+                counter = counter+1
+            messages.success(request, 'All done')
     else:
         form = UploadFileForm()
     return render(request, 'layouts/import_users.html', {'form': form})
-
