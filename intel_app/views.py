@@ -287,7 +287,7 @@ def mark_as_sent(request, pk):
         txn.transaction_status = "Completed"
         txn.save()
         sms_headers = {
-            'Authorization': 'Bearer 1050|VDqcCUHwCBEbjcMk32cbdOhCFlavpDhy6vfgM4jU',
+            'Authorization': 'Bearer 1334|wroIm5YnQD6hlZzd8POtLDXxl4vQodCZNorATYGX',
             'Content-Type': 'application/json'
         }
 
@@ -296,11 +296,11 @@ def mark_as_sent(request, pk):
 
         sms_body = {
             'recipient': f"233{txn.bundle_number}",
-            'sender_id': 'Noble Data',
+            'sender_id': 'GH BAY',
             'message': sms_message
         }
-        # response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
-        # print(response.text)
+        response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
+        print(response.text)
         messages.success(request, f"Transaction Completed")
         return redirect('mtn_admin')
 
@@ -313,7 +313,7 @@ def at_mark_as_sent(request, pk):
         txn.transaction_status = "Completed"
         txn.save()
         sms_headers = {
-            'Authorization': 'Bearer 1050|VDqcCUHwCBEbjcMk32cbdOhCFlavpDhy6vfgM4jU',
+            'Authorization': 'Bearer 1334|wroIm5YnQD6hlZzd8POtLDXxl4vQodCZNorATYGX',
             'Content-Type': 'application/json'
         }
 
@@ -322,11 +322,11 @@ def at_mark_as_sent(request, pk):
 
         sms_body = {
             'recipient': f"233{txn.bundle_number}",
-            'sender_id': 'Noble Data',
+            'sender_id': 'GH BAY',
             'message': sms_message
         }
-        # response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
-        # print(response.text)
+        response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
+        print(response.text)
         messages.success(request, f"Transaction Completed")
         return redirect('at_admin')
 
@@ -375,7 +375,7 @@ def topup_info(request):
         new_topup_request.save()
 
         sms_headers = {
-            'Authorization': 'Bearer 1320|DMvAzhkgqCGgsuDs6DHcTKnt8xcrFnD48HEiRbvr',
+            'Authorization': 'Bearer 1334|wroIm5YnQD6hlZzd8POtLDXxl4vQodCZNorATYGX',
             'Content-Type': 'application/json'
         }
 
@@ -384,11 +384,11 @@ def topup_info(request):
 
         sms_body = {
             'recipient': f"233{admin}",
-            'sender_id': 'DATASTOREGH',
+            'sender_id': 'GH BAY',
             'message': sms_message
         }
-        # response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
-        # print(response.text)
+        response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
+        print(response.text)
         messages.success(request, f"Your Request has been sent successfully. Kindly go on to pay to {admin} and use the reference stated as reference. Reference: {reference}")
         return redirect("request_successful", reference)
     return render(request, "layouts/topup-info.html")
@@ -431,7 +431,7 @@ def credit_user_from_list(request, reference):
         custom_user.wallet += amount
         custom_user.save()
         sms_headers = {
-            'Authorization': 'Bearer 1320|DMvAzhkgqCGgsuDs6DHcTKnt8xcrFnD48HEiRbvr',
+            'Authorization': 'Bearer 1334|wroIm5YnQD6hlZzd8POtLDXxl4vQodCZNorATYGX',
             'Content-Type': 'application/json'
         }
 
@@ -440,11 +440,11 @@ def credit_user_from_list(request, reference):
 
         sms_body = {
             'recipient': f"233{custom_user.phone}",
-            'sender_id': 'DATASTOREGH',
+            'sender_id': 'GH BAY',
             'message': sms_message
         }
-        # response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
-        # print(response.text)
+        response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
+        print(response.text)
         crediting.status = True
         crediting.credited_at = datetime.now()
         crediting.save()
@@ -460,23 +460,26 @@ def at_mark_completed(request, reference):
             txn.transaction_status = "Completed"
             txn.save()
 
-        # sms_headers = {
-        #     'Authorization': 'Bearer 1320|DMvAzhkgqCGgsuDs6DHcTKnt8xcrFnD48HEiRbvr',
-        #     'Content-Type': 'application/json'
-        # }
-        #
-        # sms_url = 'https://webapp.usmsgh.com/api/sms/send'
-        # sms_message = f"Hello,\nYour wallet has been topped up with GHS{amount}.\nReference: {reference}.\nThank you"
-        #
-        # sms_body = {
-        #     'recipient': f"233{custom_user.phone}",
-        #     'sender_id': 'DATASTOREGH',
-        #     'message': sms_message
-        # }
-        # response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
-        # print(response.text)
-        messages.success(request, f"Transaction Completed")
-        return redirect('history')
+            number = txn.user.phone
+            bundle = txn.offer
+
+            sms_headers = {
+                'Authorization': 'Bearer 1334|wroIm5YnQD6hlZzd8POtLDXxl4vQodCZNorATYGX',
+                'Content-Type': 'application/json'
+            }
+
+            sms_url = 'https://webapp.usmsgh.com/api/sms/send'
+            sms_message = f"Hello,\nYour AT transaction has been completed.\n{bundle} sent to {txn.bundle_number}.\nReference: {reference}.\nThank you for using GH BAY"
+
+            sms_body = {
+                'recipient': f"233{number}",
+                'sender_id': 'GH BAY',
+                'message': sms_message
+            }
+            response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
+            print(response.text)
+            messages.success(request, f"Transaction Completed")
+            return redirect('history')
 
 
 @login_required(login_url='login')
@@ -487,23 +490,26 @@ def mtn_mark_completed(request, reference):
             txn.transaction_status = "Completed"
             txn.save()
 
-        # sms_headers = {
-        #     'Authorization': 'Bearer 1320|DMvAzhkgqCGgsuDs6DHcTKnt8xcrFnD48HEiRbvr',
-        #     'Content-Type': 'application/json'
-        # }
-        #
-        # sms_url = 'https://webapp.usmsgh.com/api/sms/send'
-        # sms_message = f"Hello,\nYour wallet has been topped up with GHS{amount}.\nReference: {reference}.\nThank you"
-        #
-        # sms_body = {
-        #     'recipient': f"233{custom_user.phone}",
-        #     'sender_id': 'DATASTOREGH',
-        #     'message': sms_message
-        # }
-        # response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
-        # print(response.text)
-        messages.success(request, f"Transaction Completed")
-        return redirect('mtn_history')
+            number = txn.user.phone
+            bundle = txn.offer
+
+            sms_headers = {
+                'Authorization': 'Bearer 1334|wroIm5YnQD6hlZzd8POtLDXxl4vQodCZNorATYGX',
+                'Content-Type': 'application/json'
+            }
+
+            sms_url = 'https://webapp.usmsgh.com/api/sms/send'
+            sms_message = f"Hello,\nYour MTN transaction has been completed.\n{bundle} sent to {txn.bundle_number}.\nReference: {reference}.\nThank you for using GH BAY"
+
+            sms_body = {
+                'recipient': f"233{number}",
+                'sender_id': 'GH BAY',
+                'message': sms_message
+            }
+            response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
+            print(response.text)
+            messages.success(request, f"Transaction Completed")
+            return redirect('mtn_history')
 
 
 # def import_users(request):
