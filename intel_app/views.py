@@ -387,8 +387,8 @@ def topup_info(request):
             'sender_id': 'GH BAY',
             'message': sms_message
         }
-        response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
-        print(response.text)
+        # response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
+        # print(response.text)
         messages.success(request, f"Your Request has been sent successfully. Kindly go on to pay to {admin} and use the reference stated as reference. Reference: {reference}")
         return redirect("request_successful", reference)
     return render(request, "layouts/topup-info.html")
