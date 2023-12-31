@@ -292,10 +292,10 @@ def mark_as_sent(request, pk):
         }
 
         sms_url = 'https://webapp.usmsgh.com/api/sms/send'
-        sms_message = f"Your account has been credited with {txn.offer}.\nTransaction Reference: {txn.reference}"
+        sms_message = f"Your account has been topped up with {txn.offer}.\nTransaction Reference: {txn.reference}"
 
         sms_body = {
-            'recipient': f"233{txn.bundle_number}",
+            'recipient': f"233{txn.user.phone}",
             'sender_id': 'GH BAY',
             'message': sms_message
         }
@@ -318,7 +318,7 @@ def at_mark_as_sent(request, pk):
         }
 
         sms_url = 'https://webapp.usmsgh.com/api/sms/send'
-        sms_message = f"Your account has been credited with {txn.offer}.\nTransaction Reference: {txn.reference}"
+        sms_message = f"Your account has been topped up with {txn.offer}.\nTransaction Reference: {txn.reference}"
 
         sms_body = {
             'recipient': f"233{txn.user.phone}",
