@@ -37,6 +37,11 @@ class MTNTransactionAdmin(ExportActionMixin, admin.ModelAdmin):
     search_fields = ['reference', 'bundle_number']
 
 
+class BigTimeTransactionAdmin(ExportActionMixin, admin.ModelAdmin):
+    list_display = ['user', 'bundle_number', 'offer', 'reference', 'transaction_status', 'transaction_date']
+    search_fields = ['reference', 'bundle_number']
+
+
 class PaymentAdmin(admin.ModelAdmin):
     list_display = ['user', 'reference', 'transaction_date', 'amount']
 
@@ -55,5 +60,11 @@ admin.site.register(models.AdminInfo)
 admin.site.register(models.TopUpRequest, TopUpRequestAdmin)
 admin.site.register(models.AgentIshareBundlePrice)
 admin.site.register(models.AgentMTNBundlePrice)
+admin.site.register(models.SuperAgentBigTimeBundlePrice)
+admin.site.register(models.SuperAgentMTNBundlePrice)
+admin.site.register(models.SuperAgentIshareBundlePrice)
+admin.site.register(models.BigTimeTransaction, BigTimeTransactionAdmin)
+admin.site.register(models.BigTimeBundlePrice)
+admin.site.register(models.AgentBigTimeBundlePrice)
 
 
