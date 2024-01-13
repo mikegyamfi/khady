@@ -66,5 +66,7 @@ admin.site.register(models.SuperAgentIshareBundlePrice)
 admin.site.register(models.BigTimeTransaction, BigTimeTransactionAdmin)
 admin.site.register(models.BigTimeBundlePrice)
 admin.site.register(models.AgentBigTimeBundlePrice)
+admin.site.register(models.AFARegistration)
+admin.site.register(models.AFARegistration2)
 
 
