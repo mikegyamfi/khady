@@ -279,6 +279,7 @@ def mtn(request):
     return render(request, "layouts/services/mtn.html", context=context)
 
 
+@login_required(login_url='login')
 def afa_registration(request):
     user = models.CustomUser.objects.get(id=request.user.id)
     reference = helper.ref_generator()

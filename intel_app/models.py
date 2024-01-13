@@ -132,7 +132,7 @@ class BigTimeTransaction(models.Model):
 class AFARegistration(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     phone_number = models.BigIntegerField(null=False, blank=False)
-    gh_card_number = models.BigIntegerField(null=False, blank=False)
+    gh_card_number = models.CharField(null=False, blank=False)
     name = models.CharField(max_length=250, null=False, blank=False)
     occupation = models.CharField(max_length=20, null=False, blank=True)
     reference = models.CharField(max_length=20, null=False, blank=True)
