@@ -318,7 +318,7 @@ def afa_registration_wallet(request):
             return JsonResponse(
                 {'status': f'Your wallet balance is low. Contact the admin to recharge.'})
 
-        new_registration = models.AFARegistration.objects.create(
+        new_registration = models.AFARegistration2.objects.create(
             user=user,
             reference=reference,
             name=name,
@@ -414,7 +414,7 @@ def big_time_history(request):
 
 @login_required(login_url='login')
 def afa_history(request):
-    user_transactions = models.AFARegistration.objects.filter(user=request.user).order_by('transaction_date').reverse()
+    user_transactions = models.AFARegistration2.objects.filter(user=request.user).order_by('transaction_date').reverse()
     header = "AFA Registrations"
     net = "afa"
     context = {'txns': user_transactions, "header": header, "net": net}
@@ -468,7 +468,7 @@ def admin_bt_history(request):
 @login_required(login_url='login')
 def admin_afa_history(request):
     if request.user.is_staff and request.user.is_superuser:
-        all_txns = models.AFARegistration.objects.filter().order_by('-transaction_date')
+        all_txns = models.AFARegistration2.objects.filter().order_by('-transaction_date')
         context = {'txns': all_txns}
         return render(request, "layouts/services/afa_admin.html", context=context)
 
@@ -554,7 +554,7 @@ def bt_mark_as_sent(request, pk):
 @login_required(login_url='login')
 def afa_mark_as_sent(request, pk):
     if request.user.is_staff and request.user.is_superuser:
-        txn = models.AFARegistration.objects.filter(id=pk).first()
+        txn = models.AFARegistration2.objects.filter(id=pk).first()
         print(txn)
         txn.transaction_status = "Completed"
         txn.save()
