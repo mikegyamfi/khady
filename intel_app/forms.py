@@ -86,7 +86,7 @@ class AFARegistrationForm(forms.ModelForm):
         widget=forms.DateInput(attrs={'class': 'form-control birth', 'type': 'date'}))
 
     class Meta:
-        model = models.AFARegistration2
+        model = models.AFARegistration
         fields = ('name', 'phone_number', 'gh_card_number', 'occupation', 'date_of_birth')
 
 

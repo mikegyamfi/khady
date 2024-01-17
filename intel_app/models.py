@@ -129,7 +129,6 @@ class BigTimeTransaction(models.Model):
         return f"{self.user.username} - {self.bundle_number} - {self.reference}"
 
 
-
 class AFARegistration(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     phone_number = models.BigIntegerField(null=False, blank=False)
