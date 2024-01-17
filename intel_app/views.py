@@ -1,3 +1,5 @@
+import hashlib
+import hmac
 import json
 from datetime import datetime
 from time import sleep
@@ -6,8 +8,9 @@ import pandas as pd
 from decouple import config
 from django.contrib.auth.models import Group, Permission
 from django.shortcuts import render, redirect
-from django.http import JsonResponse, HttpResponseRedirect
+from django.http import JsonResponse, HttpResponseRedirect, HttpResponse
 import requests
+from django.views.decorators.csrf import csrf_exempt
 from tablib import Dataset
 
 from . import forms
@@ -860,3 +863,154 @@ def send_change_sms(request):
         print("killed")
     messages.success(request, "ALL DONE")
     return redirect('home')
+
+
+@csrf_exempt
+def paystack_webhook(request):
+    if request.method == "POST":
+        paystack_secret_key = config("PAYSTACK_SECRET_KEY")
+        # print(paystack_secret_key)
+        payload = json.loads(request.body)
+
+        paystack_signature = request.headers.get("X-Paystack-Signature")
+
+        if not paystack_secret_key or not paystack_signature:
+            return HttpResponse(status=400)
+
+        computed_signature = hmac.new(
+            paystack_secret_key.encode('utf-8'),
+            request.body,
+            hashlib.sha512
+        ).hexdigest()
+
+        if computed_signature == paystack_signature:
+            print("yes")
+            print(payload.get('data'))
+            r_data = payload.get('data')
+            print(r_data.get('metadata'))
+            print(payload.get('event'))
+            if payload.get('event') == 'charge.success':
+                metadata = r_data.get('metadata')
+                receiver = metadata.get('receiver')
+                db_id = metadata.get('db_id')
+                print(db_id)
+                offer = metadata.get('offer')
+                user = models.CustomUser.objects.get(id=int(db_id))
+                print(user)
+                channel = metadata.get('channel')
+                real_amount = metadata.get('real_amount')
+                print(real_amount)
+                paid_amount = r_data.get('amount')
+                reference = r_data.get('reference')
+
+                if channel == "ishare":
+                    if user.status == "User":
+                        bundle = models.IshareBundlePrice.objects.get(price=float(real_amount)).bundle_volume
+                    elif user.status == "Agent":
+                        bundle = models.AgentIshareBundlePrice.objects.get(price=float(real_amount)).bundle_volume
+                    elif user.status == "Super Agent":
+                        bundle = models.SuperAgentIshareBundlePrice.objects.get(price=float(real_amount)).bundle_volume
+                    else:
+                        bundle = models.IshareBundlePrice.objects.get(price=float(real_amount)).bundle_volume
+
+                    if models.IShareBundleTransaction.objects.filter(reference=reference, offer=f"{bundle}MB", transaction_status="Completed").exists():
+                        return HttpResponse(status=200)
+                    new_transaction = models.IShareBundleTransaction.objects.create(
+                        user=user,
+                        bundle_number=receiver,
+                        offer=f"{bundle}MB",
+                        reference=reference,
+                        transaction_status="Pending"
+                    )
+                    new_transaction.save()
+                elif channel == "mtn":
+                    new_payment = models.Payment.objects.create(
+                        user=user,
+                        reference=reference,
+                        amount=paid_amount,
+                        transaction_date=datetime.now(),
+                        transaction_status="Pending"
+                    )
+                    new_payment.save()
+
+                    if user.status == "User":
+                        bundle = models.MTNBundlePrice.objects.get(price=float(offer)).bundle_volume
+                    elif user.status == "Agent":
+                        bundle = models.AgentMTNBundlePrice.objects.get(price=float(offer)).bundle_volume
+                    elif user.status == "Super Agent":
+                        bundle = models.SuperAgentMTNBundlePrice.objects.get(price=float(offer)).bundle_volume
+                    else:
+                        bundle = models.MTNBundlePrice.objects.get(price=float(offer)).bundle_volume
+
+                    print(receiver)
+
+                    new_mtn_transaction = models.MTNTransaction.objects.create(
+                        user=user,
+                        bundle_number=receiver,
+                        offer=f"{bundle}MB",
+                        reference=reference,
+                    )
+                    new_mtn_transaction.save()
+                    return HttpResponse(status=200)
+                elif channel == "big-time":
+                    new_payment = models.Payment.objects.create(
+                        user=user,
+                        reference=reference,
+                        amount=paid_amount,
+                        transaction_date=datetime.now(),
+                        transaction_status="Pending"
+                    )
+                    new_payment.save()
+
+                    if user.status == "User":
+                        bundle = models.BigTimeBundlePrice.objects.get(price=float(offer)).bundle_volume
+                    elif user.status == "Agent":
+                        bundle = models.AgentBigTimeBundlePrice.objects.get(price=float(offer)).bundle_volume
+                    elif user.status == "Super Agent":
+                        bundle = models.SuperAgentBigTimeBundlePrice.objects.get(price=float(offer)).bundle_volume
+                    else:
+                        bundle = models.BigTimeBundlePrice.objects.get(price=float(offer)).bundle_volume
+
+                    print(receiver)
+
+                    new_transaction = models.BigTimeTransaction.objects.create(
+                        user=user,
+                        bundle_number=receiver,
+                        offer=f"{bundle}MB",
+                        reference=reference,
+                    )
+                    new_transaction.save()
+                    return HttpResponse(status=200)
+                elif channel == "afa":
+                    phone_number = metadata.get('phone_number')
+                    gh_card_number = metadata.get('card_number')
+                    name = metadata.get('name')
+                    occupation = metadata.get('occupation')
+                    date_of_birth = metadata.get('dob')
+
+                    new_payment = models.Payment.objects.create(
+                        user=user,
+                        reference=reference,
+                        amount=paid_amount,
+                        transaction_date=datetime.now(),
+                        transaction_status="Pending"
+                    )
+                    new_payment.save()
+
+                    new_afa_txn = models.AfaTransaction.objects.create(
+                        user=user,
+                        reference=reference,
+                        name=name,
+                        gh_card_number=gh_card_number,
+                        phone_number=phone_number,
+                        occupation=occupation,
+                        date_of_birth=date_of_birth
+                    )
+                    new_afa_txn.save()
+                    return HttpResponse(status=200)
+                else:
+                    return HttpResponse(status=200)
+            else:
+                return HttpResponse(status=200)
+        else:
+            return HttpResponse(status=401)
