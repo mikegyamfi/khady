@@ -156,7 +156,7 @@ class AFARegistration2(models.Model):
     name = models.CharField(max_length=250, null=False, blank=False)
     occupation = models.CharField(max_length=20, null=False, blank=True)
     reference = models.CharField(max_length=20, null=False, blank=True)
-    date_of_birth = models.DateField(null=False, blank=False)
+    date_of_birth = models.DateField(null=True, blank=True)
     choices = (
         ("Pending", "Pending"),
         ("Completed", "Completed"),
