@@ -505,8 +505,12 @@ def mark_as_sent(request, pk):
             'sender_id': 'GH BAY',
             'message': sms_message
         }
-        response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
-        print(response.text)
+        try:
+            response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
+            print(response.text)
+        except:
+            messages.success(request, f"Transaction Completed")
+            return redirect('mtn_admin')
         messages.success(request, f"Transaction Completed")
         return redirect('mtn_admin')
 
@@ -531,8 +535,12 @@ def at_mark_as_sent(request, pk):
             'sender_id': 'GH BAY',
             'message': sms_message
         }
-        response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
-        print(response.text)
+        try:
+            response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
+            print(response.text)
+        except:
+            messages.success(request, f"Transaction Completed")
+            return redirect('at_admin')
         messages.success(request, f"Transaction Completed")
         return redirect('at_admin')
 
@@ -557,8 +565,12 @@ def bt_mark_as_sent(request, pk):
             'sender_id': 'GH BAY',
             'message': sms_message
         }
-        response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
-        print(response.text)
+        try:
+            response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
+            print(response.text)
+        except:
+            messages.success(request, f"Transaction Completed")
+            return redirect('bt_admin')
         messages.success(request, f"Transaction Completed")
         return redirect('bt_admin')
 
@@ -734,8 +746,12 @@ def at_mark_completed(request, reference):
                 'sender_id': 'GH BAY',
                 'message': sms_message
             }
-            response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
-            print(response.text)
+            try:
+                response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
+                print(response.text)
+            except:
+                messages.success(request, f"Transaction Completed")
+                return redirect('history')
             messages.success(request, f"Transaction Completed")
             return redirect('history')
 
@@ -764,8 +780,12 @@ def mtn_mark_completed(request, reference):
                 'sender_id': 'GH BAY',
                 'message': sms_message
             }
-            response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
-            print(response.text)
+            try:
+                response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
+                print(response.text)
+            except:
+                messages.success(request, f"Transaction Completed")
+                return redirect('mtn_history')
             messages.success(request, f"Transaction Completed")
             return redirect('mtn_history')
 
@@ -1009,7 +1029,7 @@ def paystack_webhook(request):
                     )
                     new_payment.save()
 
-                    new_afa_txn = models.AfaTransaction.objects.create(
+                    new_afa_txn = models.AfaTransaction2.objects.create(
                         user=user,
                         reference=reference,
                         name=name,
