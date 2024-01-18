@@ -26,7 +26,7 @@ TEMPLATE_DIR = BASE_DIR / 'intel_app/templates'
 SECRET_KEY = "uhduyehudheu"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     'www.ghbays.com',
