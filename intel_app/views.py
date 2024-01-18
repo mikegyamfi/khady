@@ -692,6 +692,8 @@ def topup_list(request):
 def credit_user_from_list(request, reference):
     if request.user.is_superuser:
         crediting = models.TopUpRequest.objects.filter(reference=reference).first()
+        if crediting.status:
+            return redirect('topup_list')
         user = crediting.user
         custom_user = models.CustomUser.objects.get(username=user.username)
         amount = crediting.amount
@@ -700,6 +702,9 @@ def credit_user_from_list(request, reference):
         print(amount)
         custom_user.wallet += amount
         custom_user.save()
+        crediting.status = True
+        crediting.credited_at = datetime.now()
+        crediting.save()
         sms_headers = {
             'Authorization': 'Bearer 1334|wroIm5YnQD6hlZzd8POtLDXxl4vQodCZNorATYGX',
             'Content-Type': 'application/json'
@@ -713,11 +718,12 @@ def credit_user_from_list(request, reference):
             'sender_id': 'GH BAY',
             'message': sms_message
         }
-        response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
-        print(response.text)
-        crediting.status = True
-        crediting.credited_at = datetime.now()
-        crediting.save()
+        try:
+            response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
+            print(response.text)
+        except:
+            messages.success(request, f"{user} has been credited with {amount}")
+            return redirect('topup_list')
         messages.success(request, f"{user} has been credited with {amount}")
         return redirect('topup_list')
 
