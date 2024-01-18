@@ -52,6 +52,8 @@ def pay_with_wallet(request):
             bundle = models.AgentIshareBundlePrice.objects.get(price=float(amount)).bundle_volume
         elif user.status == "Super Agent":
             bundle = models.SuperAgentIshareBundlePrice.objects.get(price=float(amount)).bundle_volume
+        else:
+            bundle = models.IshareBundlePrice.objects.get(price=float(amount)).bundle_volume
 
         # print(bundle)
         # send_bundle_response = helper.send_bundle(request.user, phone_number, bundle, reference)
@@ -134,6 +136,8 @@ def airtel_tigo(request):
             bundle = models.AgentIshareBundlePrice.objects.get(price=float(offer)).bundle_volume
         elif user.status == "Super Agent":
             bundle = models.SuperAgentIshareBundlePrice.objects.get(price=float(offer)).bundle_volume
+        else:
+            bundle = models.IshareBundlePrice.objects.get(price=float(offer)).bundle_volume
         new_transaction = models.IShareBundleTransaction.objects.create(
             user=request.user,
             bundle_number=phone_number,
@@ -181,6 +185,8 @@ def mtn_pay_with_wallet(request):
             bundle = models.AgentMTNBundlePrice.objects.get(price=float(amount)).bundle_volume
         elif user.status == "Super Agent":
             bundle = models.SuperAgentMTNBundlePrice.objects.get(price=float(amount)).bundle_volume
+        else:
+            bundle = models.MTNBundlePrice.objects.get(price=float(amount)).bundle_volume
         print(bundle)
         new_mtn_transaction = models.MTNTransaction.objects.create(
             user=request.user,
@@ -217,6 +223,8 @@ def big_time_pay_with_wallet(request):
             bundle = models.AgentBigTimeBundlePrice.objects.get(price=float(amount)).bundle_volume
         elif user.status == "Super Agent":
             bundle = models.SuperAgentBigTimeBundlePrice.objects.get(price=float(amount)).bundle_volume
+        else:
+            bundle = models.BigTimeBundlePrice.objects.get(price=float(amount)).bundle_volume
         print(bundle)
         new_mtn_transaction = models.BigTimeTransaction.objects.create(
             user=request.user,
@@ -258,6 +266,8 @@ def mtn(request):
             bundle = models.AgentMTNBundlePrice.objects.get(price=float(offer)).bundle_volume
         elif user.status == "Super Agent":
             bundle = models.SuperAgentMTNBundlePrice.objects.get(price=float(offer)).bundle_volume
+        else:
+            bundle = models.MTNBundlePrice.objects.get(price=float(offer)).bundle_volume
         print(phone_number)
         new_mtn_transaction = models.MTNTransaction.objects.create(
             user=request.user,
@@ -360,6 +370,8 @@ def big_time(request):
         elif user.status == "Agent":
             bundle = models.AgentBigTimeBundlePrice.objects.get(price=float(offer)).bundle_volume
         elif user.status == "Super Agent":
+            bundle = models.SuperAgentBigTimeBundlePrice.objects.get(price=float(offer)).bundle_volume
+        else:
             bundle = models.SuperAgentBigTimeBundlePrice.objects.get(price=float(offer)).bundle_volume
         print(phone_number)
         new_mtn_transaction = models.BigTimeTransaction.objects.create(
