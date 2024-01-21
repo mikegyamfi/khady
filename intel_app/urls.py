@@ -3,7 +3,7 @@ from django.urls import path
 from django.conf.urls.static import static
 from . import views
 from .auth import authViews
-
+from .shop import shopViews
 
 urlpatterns = [
     path('', views.home, name="home"),
@@ -46,5 +46,33 @@ urlpatterns = [
 
     path('login', authViews.login_page, name='login'),
     path('signup', authViews.sign_up, name='signup'),
-    path('logout', authViews.logout_user, name="logout")
+    path('logout', authViews.logout_user, name="logout"),
+
+
+    ##################################################################################################################
+    path('shop/', shopViews.shop_home_collections, name='shop'),
+    path('<str:category_name>/products', shopViews.collection_products, name='collection_products'),
+    path('<str:category_name>/<str:prod_name>/details', shopViews.product_details, name='product_details'),
+
+    path('add-to-cart/', shopViews.add_to_cart, name='add_to_cart'),
+    path('cart', shopViews.viewcart, name='cart'),
+    path('update-cart', shopViews.update_cart, name='update_cart'),
+    path('delete-cart-item', shopViews.delete_cart_item, name='delete_cart_item'),
+
+    path('checkout', shopViews.checkout, name='checkout'),
+    path('my-orders', shopViews.orders, name='orders'),
+    path('view-order/<str:t_no>', shopViews.view_order, name='view_order'),
+
+    path('elevated/admin_orders', shopViews.admin_orders, name='admin_orders'),
+    path('elevated/change_order_stat/<str:t_no>/<str:stat>', shopViews.change_order_status, name='change_order_stat'),
+
+    path('product-list/', shopViews.product_list_ajax),
+    path('search-product', shopViews.search_product, name="search-product"),
+
+    path('paystack_webhook', views.paystack_webhook, name='paystack_webhook')
+
+
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

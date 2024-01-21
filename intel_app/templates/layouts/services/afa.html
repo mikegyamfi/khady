@@ -109,37 +109,48 @@
       email: email,
       amount: Number('{{price}}') * 100,
       currency: "GHS",
-      ref: ref, // generates a pseudo-unique reference. Please replace with a reference you generated. Or remove the line entirely so our API will generate one for you
-      // label: "Optional string that replaces customer email"
+      ref: ref,
+      metadata: {
+        'receiver': phonenumber,
+        'phone_number': phonenumber,
+        'channel': 'afa',
+        'real_amount': amount,
+        'db_id': "{{id}}",
+        'card_number': card,
+        'name': name,
+        'occupation': occupation,
+        'dob': birth
+      },
       onClose: function(){
         swal("Transaction Closed");
         location.reload();
       },
       callback: function(response){
-        reference = response.reference
-        let message = 'Payment complete! Reference: ' + response.reference;
-        Swal.fire({text: "Processing your order"})
-        Swal.showLoading();
-        let token = $("input[name=csrfmiddlewaretoken]").val();
-        $.ajax({
-          url: '/services/afa/',
-          method: "POST",
-          data: {
-            phone: phonenumber,
-            amount: '{{price}}',
-            reference: ref,
-            name: name,
-            card: card,
-            birth: birth,
-            occupation: occupation,
-            csrfmiddlewaretoken: token,
-          },
-          success: function(response){
-            Swal.fire({text: response.status, icon:response.icon, confirmButtonText:"Okay"}).then((value) => {
-              location.reload()
-            })
-          }
-        })
+        let reference = response.reference
+        location.reload()
+        // let message = 'Payment complete! Reference: ' + response.reference;
+        // Swal.fire({text: "Processing your order"})
+        // Swal.showLoading();
+        // let token = $("input[name=csrfmiddlewaretoken]").val();
+        // $.ajax({
+        //   url: '/services/afa/',
+        //   method: "POST",
+        //   data: {
+        //     phone: phonenumber,
+        //     amount: '{{price}}',
+        //     reference: ref,
+        //     name: name,
+        //     card: card,
+        //     birth: birth,
+        //     occupation: occupation,
+        //     csrfmiddlewaretoken: token,
+        //   },
+        //   success: function(response){
+        //     Swal.fire({text: response.status, icon:response.icon, confirmButtonText:"Okay"}).then((value) => {
+        //       location.reload()
+        //     })
+        //   }
+        // })
       }
     });
 

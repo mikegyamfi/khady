@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+  {% block content %}
+  {% include 'inc/header.html' %}
+
+  <header>
+    {% include 'inc/header.html' %}
+
+    <div class="container mx-auto mt-5 m-0">
+      <div class="row justify-content-center mt-5">
+        <div class="col-md-12 mt-5 mb-5">
+            <form class="justify-content-center" action="" method="post" id="checkout-form">
+                {% csrf_token %}
+            <div class="row">
+              <div class="col-md-7 mx-auto">
+                <div class="card shadow product-data mt-5">
+                  <div class="card-body">
+                      <div class="row checkout-form">
+              <div class="col-md-6">
+                <label for="">Full Name</label>
+                {{form.full_name}}
+              </div>
+              <div class="col-md-6 mt-2">
+                <label for="">Email</label>
+                {{form.email}}
+              </div>
+              <div class="col-md-6 mt-2">
+                <label for="">Phone</label>
+                {{form.phone}}
+              </div>
+              <div class="col-md-12 mt-2">
+                <label for="">Address</label>
+                {{form.address}}
+              </div>
+              <div class="col-md-6 mt-2">
+                <label for="">Region</label>
+                {{form.region}}
+              </div>
+                        <div class="col-md-6 mt-2">
+                <label for="">City</label>
+                {{form.city}}
+              </div>
+              <div class="col-md-12 mt-2">
+                <label for="">Message</label>
+                {{form.message}}
+              </div>
+            </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-5 mt-lg-5 mt-md-5 mt-sm-4 mt-4 mb-4 mx-auto">
+            <div class="card shadow">
+              <div class="card-body">
+            <h6>Order Summary</h6>
+            <hr />
+            {% if cart_items %}
+            <table class="table table-stripeds">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Qty</th>
+                  <th>Unit Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in cart_items %}
+                <tr>
+                  <td>
+                    {% with product_image=item.product.images.first %}
+                        <a href="{% url 'product_details' category_name=item.product.category.name prod_name=item.product.name %}">
+                            <img style="height: 30px; width: 30px" src="{{ product_image.image.url }}" alt="{{ item.product.name }}">
+                        </a>
+                    {% endwith %}
+                    {{item.product.name}}
+                  </td>
+                  <td>{{item.product_qty}}</td>
+                  <td>Ghs {{item.product.selling_price|stringformat:'d'}}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            <h6 class="fw-bold">
+              Grand Total
+              <span class="float-end">
+                GHs {{total_price|stringformat:'d'}}
+              </span>
+            </h6>
+            <input type="hidden" name="payment_mode" value="COD" />
+            <input type="hidden" name="amount" value="{{total_price}}" />
+            <input type="hidden" name="ref" value="{{ref}}">
+<!--              <button class="btn btn-success col-md-12 mt-3" onclick="payWithPaystack()">Pay Online</button>-->
+              <button class="btn btn-outline-primary col-md-12 mt-3" type="submit" onclick="payWithPaystack()">Pay with Wallet</button>
+              <p class="mt-2">Wallet Balance: GHS{{wallet}}</p>
+            {% else %}
+            <h4>Your Cart is empty</h4>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+          </div>
+            </form>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+  </main>
+
+  {% include 'inc/footer.html' %}
+
+
+{% endblock %}
+
+{% block scripts %}
+
+
+
+
+{% endblock scripts %}

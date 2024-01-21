@@ -112,6 +112,7 @@ def airtel_tigo(request):
     status = user.status
     form = forms.IShareBundleForm(status)
     reference = helper.ref_generator()
+    db_user_id = request.user.id
     user_email = request.user.email
     if request.method == "POST":
         form = forms.IShareBundleForm(data=request.POST, status=status)
@@ -159,7 +160,7 @@ def airtel_tigo(request):
         # print(data)
         return JsonResponse({'status': 'Transaction Completed Successfully', 'icon': 'success'})
     user = models.CustomUser.objects.get(id=request.user.id)
-    context = {"form": form, "ref": reference, "email": user_email, "wallet": 0 if user.wallet is None else user.wallet}
+    context = {"form": form, "ref": reference, 'id': db_user_id, "email": user_email, "wallet": 0 if user.wallet is None else user.wallet}
     return render(request, "layouts/services/at.html", context=context)
 
 
@@ -244,6 +245,7 @@ def mtn(request):
     user = models.CustomUser.objects.get(id=request.user.id)
     status = user.status
     form = forms.MTNForm(status)
+    db_user_id = request.user.id
     reference = helper.ref_generator()
     user_email = request.user.email
 
@@ -287,7 +289,7 @@ def mtn(request):
         mtn_offer = models.MTNBundlePrice.objects.all()
     for offer in mtn_offer:
         mtn_dict[str(offer)] = offer.bundle_volume
-    context = {'form': form, 'phone_num': phone_num, 'mtn_dict': json.dumps(mtn_dict),
+    context = {'form': form, 'phone_num': phone_num, 'id': db_user_id, 'mtn_dict': json.dumps(mtn_dict),
                "ref": reference, "email": user_email, "wallet": 0 if user.wallet is None else user.wallet}
     return render(request, "layouts/services/mtn.html", context=context)
 
@@ -296,6 +298,7 @@ def mtn(request):
 def afa_registration(request):
     user = models.CustomUser.objects.get(id=request.user.id)
     reference = helper.ref_generator()
+    db_user_id = request.user.id
     price = models.AdminInfo.objects.filter().first().afa_price
     user_email = request.user.email
     print(price)
@@ -305,7 +308,7 @@ def afa_registration(request):
             form.save()
             messages.success(request, "Registration will be done shortly")
     form = forms.AFARegistrationForm()
-    context = {'form': form, 'ref': reference, 'price': price, "email": user_email, "wallet": 0 if user.wallet is None else user.wallet}
+    context = {'form': form, 'ref': reference, 'price': price, 'id': db_user_id, "email": user_email, "wallet": 0 if user.wallet is None else user.wallet}
     return render(request, "layouts/services/afa.html", context=context)
 
 
@@ -350,6 +353,7 @@ def big_time(request):
     status = user.status
     form = forms.BigTimeBundleForm(status)
     reference = helper.ref_generator()
+    db_user_id = request.user.id
     user_email = request.user.email
 
     if request.method == "POST":
@@ -393,7 +397,7 @@ def big_time(request):
     # for offer in mtn_offer:
     #     mtn_dict[str(offer)] = offer.bundle_volume
     context = {'form': form,
-               "ref": reference, "email": user_email, "wallet": 0 if user.wallet is None else user.wallet}
+               "ref": reference, "email": user_email, 'id': db_user_id, "wallet": 0 if user.wallet is None else user.wallet}
     return render(request, "layouts/services/big_time.html", context=context)
 
 
@@ -932,7 +936,7 @@ def paystack_webhook(request):
                 receiver = metadata.get('receiver')
                 db_id = metadata.get('db_id')
                 print(db_id)
-                offer = metadata.get('offer')
+                # offer = metadata.get('offer')
                 user = models.CustomUser.objects.get(id=int(db_id))
                 print(user)
                 channel = metadata.get('channel')
@@ -972,13 +976,13 @@ def paystack_webhook(request):
                     new_payment.save()
 
                     if user.status == "User":
-                        bundle = models.MTNBundlePrice.objects.get(price=float(offer)).bundle_volume
+                        bundle = models.MTNBundlePrice.objects.get(price=float(real_amount)).bundle_volume
                     elif user.status == "Agent":
-                        bundle = models.AgentMTNBundlePrice.objects.get(price=float(offer)).bundle_volume
+                        bundle = models.AgentMTNBundlePrice.objects.get(price=float(real_amount)).bundle_volume
                     elif user.status == "Super Agent":
-                        bundle = models.SuperAgentMTNBundlePrice.objects.get(price=float(offer)).bundle_volume
+                        bundle = models.SuperAgentMTNBundlePrice.objects.get(price=float(real_amount)).bundle_volume
                     else:
-                        bundle = models.MTNBundlePrice.objects.get(price=float(offer)).bundle_volume
+                        bundle = models.MTNBundlePrice.objects.get(price=float(real_amount)).bundle_volume
 
                     print(receiver)
 
@@ -1001,13 +1005,13 @@ def paystack_webhook(request):
                     new_payment.save()
 
                     if user.status == "User":
-                        bundle = models.BigTimeBundlePrice.objects.get(price=float(offer)).bundle_volume
+                        bundle = models.BigTimeBundlePrice.objects.get(price=float(real_amount)).bundle_volume
                     elif user.status == "Agent":
-                        bundle = models.AgentBigTimeBundlePrice.objects.get(price=float(offer)).bundle_volume
+                        bundle = models.AgentBigTimeBundlePrice.objects.get(price=float(real_amount)).bundle_volume
                     elif user.status == "Super Agent":
-                        bundle = models.SuperAgentBigTimeBundlePrice.objects.get(price=float(offer)).bundle_volume
+                        bundle = models.SuperAgentBigTimeBundlePrice.objects.get(price=float(real_amount)).bundle_volume
                     else:
-                        bundle = models.BigTimeBundlePrice.objects.get(price=float(offer)).bundle_volume
+                        bundle = models.BigTimeBundlePrice.objects.get(price=float(real_amount)).bundle_volume
 
                     print(receiver)
 
