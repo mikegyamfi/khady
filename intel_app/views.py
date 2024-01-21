@@ -957,14 +957,16 @@ def paystack_webhook(request):
 
                     if models.IShareBundleTransaction.objects.filter(reference=reference, offer=f"{bundle}MB", transaction_status="Completed").exists():
                         return HttpResponse(status=200)
-                    new_transaction = models.IShareBundleTransaction.objects.create(
-                        user=user,
-                        bundle_number=receiver,
-                        offer=f"{bundle}MB",
-                        reference=reference,
-                        transaction_status="Pending"
-                    )
-                    new_transaction.save()
+                    else:
+                        new_transaction = models.IShareBundleTransaction.objects.create(
+                            user=user,
+                            bundle_number=receiver,
+                            offer=f"{bundle}MB",
+                            reference=reference,
+                            transaction_status="Pending"
+                        )
+                        new_transaction.save()
+                        return HttpResponse(status=200)
                 elif channel == "mtn":
                     new_payment = models.Payment.objects.create(
                         user=user,
