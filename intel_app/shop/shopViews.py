@@ -275,7 +275,7 @@ def search_product(request):
 
 
 def change_order_status(request, t_no, stat):
-    order = models.Order.objects.filter(tracking_number=t_no).filter(user=request.user).first()
+    order = models.Order.objects.filter(tracking_number=t_no).first()
     if request.user.is_superuser:
         if stat == "out":
             order.status = "Out for Delivery"
