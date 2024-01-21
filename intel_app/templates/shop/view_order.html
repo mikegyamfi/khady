@@ -46,8 +46,10 @@
                                 {{order.city}}
                                 {{order.region}}
                             </div>
-                            <hr>
+                            {% if order %}
+                                                        <hr>
                             <a class="btn btn-sm btn-outline-success" href="{% url 'change_order_stat' t_no=order.tracking_number stat='completedd' %}">I have received my order</a>
+                            {% endif %}
                             {% if request.user.is_superuser %}
                             <hr>
                             <p class="mt-2"><em><strong>Order placed by:</strong> {{order.user.first_name}} {{order.user.last_name}} - 0{{order.user.phone}}</em></p>
