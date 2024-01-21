@@ -231,7 +231,10 @@ def orders(request):
 
 @login_required(login_url='login')
 def view_order(request, t_no):
-    order = models.Order.objects.filter(tracking_number=t_no).filter(user=request.user).first()
+    if request.user.is_superuser:
+        order = models.Order.objects.filter(tracking_number=t_no).first()
+    else:
+        order = models.Order.objects.filter(tracking_number=t_no).filter(user=request.user).first()
     order_items = models.OrderItem.objects.filter(order=order)
     context = {'order_items': order_items, 'order': order}
     return render(request, 'shop/view_order.html', context)
@@ -273,29 +276,6 @@ def search_product(request):
 
 def change_order_status(request, t_no, stat):
     order = models.Order.objects.filter(tracking_number=t_no).filter(user=request.user).first()
-    if stat == "Completed":
-        order.status = "Completed"
-        order.save()
-        sms_headers = {
-            'Authorization': 'Bearer 1334|wroIm5YnQD6hlZzd8POtLDXxl4vQodCZNorATYGX',
-            'Content-Type': 'application/json'
-        }
-
-        sms_url = 'https://webapp.usmsgh.com/api/sms/send'
-        sms_message = f"Hello {order.full_name},\nYour Order with tracking number {t_no} has been delivered successfully. Thank you for your patronage. Keep Shopping!"
-
-        sms_body = {
-            'recipient': f"233{order.phone}",
-            'sender_id': 'GH BAY',
-            'message': sms_message
-        }
-        try:
-            response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
-            print(response.text)
-        except:
-            print("Could not send sms message")
-        messages.success(request, "Your Order has been delivered")
-        return redirect('view_order', t_no=t_no)
     if request.user.is_superuser:
         if stat == "out":
             order.status = "Out for Delivery"
