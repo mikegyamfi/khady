@@ -1041,7 +1041,7 @@ def paystack_webhook(request):
                     )
                     new_payment.save()
 
-                    new_afa_txn = models.AfaTransaction2.objects.create(
+                    new_afa_txn = models.AFARegistration2.objects.create(
                         user=user,
                         reference=reference,
                         name=name,
