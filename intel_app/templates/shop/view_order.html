@@ -52,7 +52,7 @@
                             <p class="mt-2"><em><strong>Order placed by:</strong> {{order.user.first_name}} {{order.user.last_name}} - 0{{order.user.phone}}</em></p>
                             <div>
                                 <a class="btn btn-sm btn-outline-warning" href="{% url 'change_order_stat' t_no=order.tracking_number stat='out' %}">Out for Delivery</a>
-                                <a class="btn btn-sm btn-outline-success" href="{% url 'change_order_stat' t_no=order.tracking_number stat='completed' %}">Completed</a>
+                                <a class="btn btn-sm btn-outline-success" href="{% url 'change_order_stat' t_no=order.tracking_number stat='Completed' %}">Completed</a>
                             </div>
                             {% endif %}
                         </div>
