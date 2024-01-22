@@ -86,7 +86,7 @@
               </span>
             </h6>
             <input type="hidden" name="payment_mode" value="COD" />
-            <input type="hidden" name="amount" value="{{total_price}}" />
+            <input type="hidden" name="amount" class="tt" value="{{total_price}}" />
             <input type="hidden" class="reference" name="ref" value="{{ref}}">
                   <input type="hidden" class="email" name="email" value="{{email}}">
               <button class="btn btn-success col-md-12 mt-3" onclick="payWithPaystack()">Pay Online</button>
@@ -130,6 +130,7 @@ const paymentForm = document.getElementById('checkout-form');
     let phonenumber = $(".phone").val()
     let name = $(".full_name").val()
     let address = $(".address").val()
+      let total_price = $(".tt").val()
     let region = $(".region").val()
     let city = $(".city").val()
       let message = $(".mesage").val()
@@ -141,7 +142,7 @@ const paymentForm = document.getElementById('checkout-form');
     let handler = PaystackPop.setup({
       key: 'pk_live_7055f8c8c4761f55114fb477035e68505b354572',
       email: email,
-      amount: Number('{{price}}') * 100,
+      amount: total_price,
       currency: "GHS",
       ref: ref,
       metadata: {
