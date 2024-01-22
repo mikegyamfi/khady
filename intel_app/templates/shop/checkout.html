@@ -89,8 +89,8 @@
             <input type="hidden" name="amount" class="tt" value="{{total_price}}" />
             <input type="hidden" class="reference" name="ref" value="{{ref}}">
                   <input type="hidden" class="email" name="email" value="{{email}}">
-              <button class="btn btn-success col-md-12 mt-3" onclick="payWithPaystack()">Pay Online</button>
-              <button class="btn btn-outline-primary col-md-12 mt-3" type="submit">Pay with Wallet</button>
+              <button class="btn btn-success col-md-12 mt-3" type="submit" onclick="payWithPaystack()">Pay Online</button>
+              <button class="btn btn-outline-primary col-md-12 mt-3" type="button" onclick="submitForm()">Pay with Wallet</button>
               <p class="mt-2">Wallet Balance: GHS{{wallet}}</p>
             {% else %}
             <h4>Your Cart is empty</h4>
@@ -122,6 +122,7 @@ const paymentForm = document.getElementById('checkout-form');
   let email = $(".email").val()
   let ref = $(".reference").val()
   console.log(email + ref)
+  paymentForm.addEventListener("submit", payWithPaystack, false);
   function payWithPaystack(e) {
     e.preventDefault();
     let amount = $(".airtime-input").val()
@@ -192,6 +193,11 @@ const paymentForm = document.getElementById('checkout-form');
     });
 
   handler.openIframe();
+}
+
+function submitForm() {
+  // Trigger form submission
+  paymentForm.submit();
 }
 </script>
 
