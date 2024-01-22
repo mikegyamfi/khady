@@ -19,10 +19,8 @@ from intel_app import models, forms
 
 
 def shop_home_collections(request):
-    collections = models.Category.objects.filter(status=True)
-    context = {
-        'collections': collections
-    }
+    general_categories = models.GeneralCategory.objects.all()
+    context = {'general_categories': general_categories}
     return render(request, 'shop/collections.html', context=context)
 
 
