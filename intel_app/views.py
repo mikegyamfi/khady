@@ -1077,6 +1077,8 @@ def paystack_webhook(request):
                         cart_total_price += item.product.selling_price * item.product_qty
                     print(cart_total_price)
                     print(user.wallet)
+                    if models.Order.objects.filter(tracking_number=reference, message=message, payment_id=reference).exists():
+                        return HttpResponse(status=200)
                     if user.wallet == 0 or user.wallet is None or cart_total_price > user.wallet:
                         messages.info(request, "Not enough wallet balance")
                         return redirect('checkout')
