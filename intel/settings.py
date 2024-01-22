@@ -183,7 +183,7 @@ AWS_DEFAULT_ACL = 'public-read'
 
 AWS_LOCATION = config("AWS_LOCATION")
 
-MEDIA_LOCATION = 'intel_app/media'
+MEDIA_LOCATION = 'media'
 MEDIA_URL = 'https://%s/%s/' % (AWS_S3_ENDPOINT_URL, 'media')
 DEFAULT_FILE_STORAGE = 'custom_storages.MediaStorage'
 
