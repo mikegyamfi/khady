@@ -3,6 +3,10 @@ from datetime import datetime
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+
+from intel_app.custom_storages import MediaStorage
+
+
 # Create your models here.
 
 
@@ -263,7 +267,7 @@ class Brand(models.Model):
 class Category(models.Model):
     slug = models.CharField(max_length=250, null=False, blank=False)
     name = models.CharField(max_length=250, null=False, blank=True)
-    image = models.ImageField(upload_to='category/', null=True, blank=True)
+    image = models.ImageField(upload_to='category/', null=True, blank=True, storage=MediaStorage)
     description = models.TextField(max_length=600, null=False, blank=False)
     status = models.BooleanField(default=False, help_text="0=default, 1=Hidden")
     trending = models.BooleanField(default=False, help_text="0=default, 1=Trending")
@@ -298,7 +302,7 @@ class Product(models.Model):
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to='product_images/', blank=True, null=True)
+    image = models.ImageField(upload_to='product_images/', blank=True, null=True, storage=MediaStorage)
     description = models.CharField(max_length=250, blank=True, null=True)
 
     def __str__(self):

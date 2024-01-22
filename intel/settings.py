@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'intel_app'
+    'intel_app',
+    'storages',
 ]
 
 JAZZMIN_SETTINGS = {
@@ -164,4 +165,23 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'intel_app/media')
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 AUTH_USER_MODEL = 'intel_app.CustomUser'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
+
+AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY")
+
+AWS_STORAGE_BUCKET_NAME = config("AWS_STORAGE_BUCKET_NAME")
+
+AWS_S3_ENDPOINT_URL = config("AWS_S3_ENDPOINT_URL")
+
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400',
+}
+
+AWS_DEFAULT_ACL = 'public-read'
+
+AWS_LOCATION = config("AWS_LOCATION")
+
+DEFAULT_FILE_STORAGE = 'custom_storages.MediaStorage'
 
