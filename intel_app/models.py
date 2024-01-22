@@ -271,9 +271,9 @@ class Category(models.Model):
     description = models.TextField(max_length=600, null=False, blank=False)
     status = models.BooleanField(default=False, help_text="0=default, 1=Hidden")
     trending = models.BooleanField(default=False, help_text="0=default, 1=Trending")
-    meta_title = models.CharField(max_length=150, null=False, blank=False)
-    meta_keywords = models.CharField(max_length=150, null=False, blank=False)
-    meta_description = models.CharField(max_length=150, null=False, blank=False)
+    meta_title = models.CharField(max_length=150, null=True, blank=True)
+    meta_keywords = models.CharField(max_length=150, null=True, blank=True)
+    meta_description = models.CharField(max_length=150, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -291,9 +291,9 @@ class Product(models.Model):
     status = models.BooleanField(default=False, help_text="0=default, 1=Hidden")
     trending = models.BooleanField(default=False, help_text="0=default, 1=Trending")
     tag = models.CharField(max_length=150, blank=False)
-    meta_title = models.CharField(max_length=150, blank=False)
-    meta_keywords = models.CharField(max_length=150, blank=False)
-    meta_description = models.CharField(max_length=150, blank=False)
+    meta_title = models.CharField(max_length=150, blank=True)
+    meta_keywords = models.CharField(max_length=150, blank=True)
+    meta_description = models.CharField(max_length=150, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
