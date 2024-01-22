@@ -122,7 +122,6 @@ const paymentForm = document.getElementById('checkout-form');
   let email = $(".email").val()
   let ref = $(".reference").val()
   console.log(email + ref)
-  paymentForm.addEventListener("submit", payWithPaystack, false);
   function payWithPaystack(e) {
     e.preventDefault();
     let amount = $(".airtime-input").val()
