@@ -1108,7 +1108,7 @@ def paystack_webhook(request):
                         order_product.quantity -= item.product_qty
                         order_product.save()
 
-                    models.Cart.objects.filter(user=request.user).delete()
+                    models.Cart.objects.filter(user=user).delete()
 
                     sms_headers = {
                         'Authorization': 'Bearer 1334|wroIm5YnQD6hlZzd8POtLDXxl4vQodCZNorATYGX',
