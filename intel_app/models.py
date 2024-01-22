@@ -256,6 +256,11 @@ def get_file_path(filename):
     return os.path.join('uploads/', filename)
 
 
+class GeneralCategory(models.Model):
+    name = models.CharField(max_length=250, null=False, blank=False)
+    description = models.CharField(max_length=250, null=True, blank=True)
+
+
 class Brand(models.Model):
     name = models.CharField(max_length=250, null=False, blank=False, default="Generic")
     description = models.CharField(max_length=500, null=True, blank=True)
@@ -266,6 +271,7 @@ class Brand(models.Model):
 
 class Category(models.Model):
     slug = models.CharField(max_length=250, null=False, blank=False)
+    general_category = models.ForeignKey(GeneralCategory, on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(max_length=250, null=False, blank=True)
     image = models.ImageField(upload_to='category/', null=True, blank=True, storage=MediaStorage())
     description = models.TextField(max_length=600, null=False, blank=False)
