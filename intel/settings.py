@@ -158,7 +158,7 @@ STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'assets/'
 STATICFILES_DIRS = [BASE_DIR / 'intel_app/static']
 
-MEDIA_URL = '/media/'
+# MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'intel_app/media')
 
 # Default primary key field type
@@ -183,5 +183,7 @@ AWS_DEFAULT_ACL = 'public-read'
 
 AWS_LOCATION = config("AWS_LOCATION")
 
+MEDIA_LOCATION = 'intel_app/media'
+MEDIA_URL = 'https://%s/%s/' % (AWS_S3_ENDPOINT_URL, 'media')
 DEFAULT_FILE_STORAGE = 'custom_storages.MediaStorage'
 
