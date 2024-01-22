@@ -88,7 +88,8 @@
             <input type="hidden" name="payment_mode" value="COD" />
             <input type="hidden" name="amount" value="{{total_price}}" />
             <input type="hidden" class="reference" name="ref" value="{{ref}}">
-<!--              <button class="btn btn-success col-md-12 mt-3" onclick="payWithPaystack()">Pay Online</button>-->
+                  <input type="hidden" class="email" name="email" value="{{email}}">
+              <button class="btn btn-success col-md-12 mt-3" onclick="payWithPaystack()">Pay Online</button>
               <button class="btn btn-outline-primary col-md-12 mt-3" type="submit" onclick="payWithPaystack()">Pay with Wallet</button>
               <p class="mt-2">Wallet Balance: GHS{{wallet}}</p>
             {% else %}
@@ -117,7 +118,7 @@
 
 <script>
 
-const paymentForm = document.getElementById('tigoPaymentForm');
+const paymentForm = document.getElementById('checkout-form');
   let email = $(".email").val()
   let ref = $(".reference").val()
   console.log(email + ref)

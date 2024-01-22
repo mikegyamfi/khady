@@ -216,9 +216,10 @@ def checkout(request):
         }
     )
     user = models.CustomUser.objects.filter(id=request.user.id).first()
+    email = user.email
     db_user_id = request.user.id
     context = {'cart_items': cart_items, 'id': db_user_id, 'total_price': total_price, 'amount': total_price_paystack,
-               'ref': ref, 'form': form, 'wallet': user.wallet}
+               'ref': ref, 'email': email, 'form': form, 'wallet': user.wallet}
     return render(request, 'shop/checkout.html', context)
 
 

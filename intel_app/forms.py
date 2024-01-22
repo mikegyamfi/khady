@@ -92,7 +92,7 @@ class AFARegistrationForm(forms.ModelForm):
 
 class OrderDetailsForm(forms.ModelForm):
     full_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control full_name'}))
-    email = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control' 'order_email'}))
+    email = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control order_email'}))
     phone = forms.IntegerField(
         widget=forms.NumberInput(attrs={'class': 'form-control phone', 'placeholder': '0240000000'}))
     address = forms.CharField(required=False, widget=forms.Textarea(
