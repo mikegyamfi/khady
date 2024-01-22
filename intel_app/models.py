@@ -345,7 +345,8 @@ class Order(models.Model):
     order_statuses = (
         ('Processing', 'Processing'),
         ('Out for Delivery', 'Out for Delivery'),
-        ('Completed', 'Completed')
+        ('Completed', 'Completed'),
+        ('Canceled', 'Canceled')
     )
     status = models.CharField(max_length=50, choices=order_statuses, default="Processing")
     customer_mark_as_received = models.BooleanField(default=False)

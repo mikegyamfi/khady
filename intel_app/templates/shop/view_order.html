@@ -53,6 +53,7 @@
                             <div>
                                 <a class="btn btn-sm btn-outline-warning" href="{% url 'change_order_stat' t_no=order.tracking_number stat='out' %}">Out for Delivery</a>
                                 <a class="btn btn-sm btn-outline-success" href="{% url 'change_order_stat' t_no=order.tracking_number stat='Completed' %}">Completed</a>
+                                <a class="btn btn-sm btn-outline-success" href="{% url 'change_order_stat' t_no=order.tracking_number stat='Canceled' %}">Cancel</a>
                             </div>
                             {% endif %}
                         </div>

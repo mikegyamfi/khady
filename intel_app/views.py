@@ -40,9 +40,11 @@ def pay_with_wallet(request):
         amount = request.POST.get("amount")
         reference = request.POST.get("reference")
         if user.wallet is None:
-            return JsonResponse({'status': f'Your wallet balance is low. Contact the admin to recharge. Admin Contact Info: 0{admin}'})
+            return JsonResponse(
+                {'status': f'Your wallet balance is low. Contact the admin to recharge. Admin Contact Info: 0{admin}'})
         elif user.wallet <= 0 or user.wallet < float(amount):
-            return JsonResponse({'status': f'Your wallet balance is low. Contact the admin to recharge. Admin Contact Info: 0{admin}'})
+            return JsonResponse(
+                {'status': f'Your wallet balance is low. Contact the admin to recharge. Admin Contact Info: 0{admin}'})
         print(phone_number)
         print(amount)
         print(reference)
@@ -160,7 +162,8 @@ def airtel_tigo(request):
         # print(data)
         return JsonResponse({'status': 'Transaction Completed Successfully', 'icon': 'success'})
     user = models.CustomUser.objects.get(id=request.user.id)
-    context = {"form": form, "ref": reference, 'id': db_user_id, "email": user_email, "wallet": 0 if user.wallet is None else user.wallet}
+    context = {"form": form, "ref": reference, 'id': db_user_id, "email": user_email,
+               "wallet": 0 if user.wallet is None else user.wallet}
     return render(request, "layouts/services/at.html", context=context)
 
 
@@ -308,7 +311,8 @@ def afa_registration(request):
             form.save()
             messages.success(request, "Registration will be done shortly")
     form = forms.AFARegistrationForm()
-    context = {'form': form, 'ref': reference, 'price': price, 'id': db_user_id, "email": user_email, "wallet": 0 if user.wallet is None else user.wallet}
+    context = {'form': form, 'ref': reference, 'price': price, 'id': db_user_id, "email": user_email,
+               "wallet": 0 if user.wallet is None else user.wallet}
     return render(request, "layouts/services/afa.html", context=context)
 
 
@@ -397,13 +401,15 @@ def big_time(request):
     # for offer in mtn_offer:
     #     mtn_dict[str(offer)] = offer.bundle_volume
     context = {'form': form,
-               "ref": reference, "email": user_email, 'id': db_user_id, "wallet": 0 if user.wallet is None else user.wallet}
+               "ref": reference, "email": user_email, 'id': db_user_id,
+               "wallet": 0 if user.wallet is None else user.wallet}
     return render(request, "layouts/services/big_time.html", context=context)
 
 
 @login_required(login_url='login')
 def history(request):
-    user_transactions = models.IShareBundleTransaction.objects.filter(user=request.user).order_by('transaction_date').reverse()
+    user_transactions = models.IShareBundleTransaction.objects.filter(user=request.user).order_by(
+        'transaction_date').reverse()
     header = "AirtelTigo Transactions"
     net = "tigo"
     context = {'txns': user_transactions, "header": header, "net": net}
@@ -421,7 +427,8 @@ def mtn_history(request):
 
 @login_required(login_url='login')
 def big_time_history(request):
-    user_transactions = models.BigTimeTransaction.objects.filter(user=request.user).order_by('transaction_date').reverse()
+    user_transactions = models.BigTimeTransaction.objects.filter(user=request.user).order_by(
+        'transaction_date').reverse()
     header = "Big Time Transactions"
     net = "bt"
     context = {'txns': user_transactions, "header": header, "net": net}
@@ -446,7 +453,7 @@ def verify_transaction(request, reference):
             amount = data["data"]["amount"]
             api_reference = data["data"]["reference"]
             date = data["data"]["paid_at"]
-            real_amount = float(amount)/100
+            real_amount = float(amount) / 100
             print(status)
             print(real_amount)
             print(api_reference)
@@ -663,7 +670,8 @@ def topup_info(request):
         }
         # response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
         # print(response.text)
-        messages.success(request, f"Your Request has been sent successfully. Kindly go on to pay to {admin} and use the reference stated as reference. Reference: {reference}")
+        messages.success(request,
+                         f"Your Request has been sent successfully. Kindly go on to pay to {admin} and use the reference stated as reference. Reference: {reference}")
         return redirect("request_successful", reference)
     return render(request, "layouts/topup-info.html")
 
@@ -865,7 +873,7 @@ def populate_custom_users_from_excel(request):
                 #     permissions = Permission.objects.filter(id__in=permission_ids)
                 #     custom_user.user_permissions.set(permissions)
                 print("killed")
-                counter = counter+1
+                counter = counter + 1
             messages.success(request, 'All done')
     else:
         form = UploadFileForm()
@@ -900,7 +908,7 @@ def send_change_sms(request):
 
         response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
         print(response.text)
-        counter = counter+1
+        counter = counter + 1
         print(counter)
         print("killed")
     messages.success(request, "ALL DONE")
@@ -955,7 +963,8 @@ def paystack_webhook(request):
                     else:
                         bundle = models.IshareBundlePrice.objects.get(price=float(real_amount)).bundle_volume
 
-                    if models.IShareBundleTransaction.objects.filter(reference=reference, offer=f"{bundle}MB", transaction_status="Completed").exists():
+                    if models.IShareBundleTransaction.objects.filter(reference=reference, offer=f"{bundle}MB",
+                                                                     transaction_status="Completed").exists():
                         return HttpResponse(status=200)
                     else:
                         new_transaction = models.IShareBundleTransaction.objects.create(
@@ -1051,6 +1060,74 @@ def paystack_webhook(request):
                         date_of_birth=date_of_birth
                     )
                     new_afa_txn.save()
+                    return HttpResponse(status=200)
+                elif channel == "commerce":
+                    phone_number = metadata.get('phone_number')
+                    region = metadata.get('region')
+                    name = metadata.get('name')
+                    city = metadata.get('city')
+                    message = metadata.get('message')
+                    address = metadata.get('address')
+                    order_mail = metadata.get('order_mail')
+
+                    new_order_items = models.Cart.objects.filter(user=user)
+                    cart = models.Cart.objects.filter(user=user)
+                    cart_total_price = 0
+                    for item in cart:
+                        cart_total_price += item.product.selling_price * item.product_qty
+                    print(cart_total_price)
+                    print(user.wallet)
+                    if user.wallet == 0 or user.wallet is None or cart_total_price > user.wallet:
+                        messages.info(request, "Not enough wallet balance")
+                        return redirect('checkout')
+                    order_form = models.Order.objects.create(
+                        user=user,
+                        full_name=name,
+                        email=order_mail,
+                        phone=phone_number,
+                        address=address,
+                        city=city,
+                        region=region,
+                        total_price=cart_total_price,
+                        payment_mode="Paystack",
+                        payment_id=reference,
+                        message=message,
+                        tracking_number=reference
+                    )
+                    order_form.save()
+
+                    for item in new_order_items:
+                        models.OrderItem.objects.create(
+                            order=order_form,
+                            product=item.product,
+                            tracking_number=order_form.tracking_number,
+                            price=item.product.selling_price,
+                            quantity=item.product_qty
+                        )
+                        order_product = models.Product.objects.filter(id=item.product_id).first()
+                        order_product.quantity -= item.product_qty
+                        order_product.save()
+
+                    models.Cart.objects.filter(user=request.user).delete()
+
+                    sms_headers = {
+                        'Authorization': 'Bearer 1334|wroIm5YnQD6hlZzd8POtLDXxl4vQodCZNorATYGX',
+                        'Content-Type': 'application/json'
+                    }
+
+                    sms_url = 'https://webapp.usmsgh.com/api/sms/send'
+                    sms_message = f"Order Placed Successfully\nYour order with order number {order_form.tracking_number} has been received and is being processed.\nYou will receive a message when your order is Out for Delivery.\nThank you for shopping with GH BAY"
+
+                    sms_body = {
+                        'recipient': f"233{order_form.phone}",
+                        'sender_id': 'GH BAY',
+                        'message': sms_message
+                    }
+                    try:
+                        response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
+                        print(response.text)
+                    except:
+                        print("Could not send sms message")
                     return HttpResponse(status=200)
                 else:
                     return HttpResponse(status=200)
