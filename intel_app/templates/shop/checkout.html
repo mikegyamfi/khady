@@ -142,7 +142,7 @@ const paymentForm = document.getElementById('checkout-form');
     let handler = PaystackPop.setup({
       key: 'pk_live_7055f8c8c4761f55114fb477035e68505b354572',
       email: email,
-      amount: total_price,
+      amount: total_price * 100,
       currency: "GHS",
       ref: ref,
       metadata: {
