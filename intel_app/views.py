@@ -1070,6 +1070,8 @@ def paystack_webhook(request):
                     address = metadata.get('address')
                     order_mail = metadata.get('order_mail')
 
+                    print(phone_number, region, name, city, message, address, order_mail)
+
                     new_order_items = models.Cart.objects.filter(user=user)
                     cart = models.Cart.objects.filter(user=user)
                     cart_total_price = 0
