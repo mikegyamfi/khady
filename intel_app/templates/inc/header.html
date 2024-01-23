@@ -34,7 +34,7 @@
           {% endif %}
           {% if request.user.is_superuser %}
           <li class="nav-item">
-            <a href="{% url 'cart' %}" class="nav-link">Cart</a>
+            <a href="{% url 'cart' %}" class="nav-link">Your Cart <i class="fa-solid fa-cart-shopping"></i></a>
           </li>
           {% endif %}
           <li class="nav-item">
