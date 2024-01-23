@@ -39,11 +39,10 @@
           </div>
 
         {% for general_category in general_categories %}
-          <h3>{{ general_category.name }}</h3>
-          <hr>
+          <h4 style="text-decoration: underline" class="mt-1">{{ general_category.name }}</h4>
           <div class="row justify-content-center">
            {% for collection in general_category.category_set.all %}
-           <div class="col-6 col-lg-3 col-lg-auto py-3 wow fadeInLeft">
+           <div class="col-6 col-lg-3 col-lg-auto py-3 mb-3 wow fadeInLeft">
              <div class="card-pricing p-2">
                <div class="header">
                    <img style="width: 150px" src="{{collection.image.url}}" alt="">
@@ -61,8 +60,8 @@
                </div>
              </div>
            </div>
-            <hr>
            {% endfor %}
+                          <hr>
      </div>
         {% endfor %}
       </div>
