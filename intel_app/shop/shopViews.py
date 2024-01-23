@@ -19,7 +19,7 @@ from intel_app import models, forms
 
 
 def shop_home_collections(request):
-    general_categories = models.GeneralCategory.objects.all()
+    general_categories = models.GeneralCategory.objects.all().order_by('name')
     context = {'general_categories': general_categories}
     return render(request, 'shop/collections.html', context=context)
 
