@@ -223,7 +223,7 @@ def checkout(request):
 
 @login_required(login_url='login')
 def orders(request):
-    all_orders = models.Order.objects.filter(user=request.user)
+    all_orders = models.Order.objects.filter(user=request.user).order_by('-created_at')
     context = {'orders': all_orders}
     return render(request, 'shop/order-page.html', context)
 
@@ -242,7 +242,7 @@ def view_order(request, t_no):
 @login_required(login_url='login')
 def admin_orders(request):
     if request.user.is_superuser or request.user.is_staff:
-        all_orders = models.Order.objects.all()
+        all_orders = models.Order.objects.all().order_by('-created_at')
         context = {'orders': all_orders, 'admin': 'Yes'}
         return render(request, 'shop/order-page.html', context)
     else:
