@@ -62,49 +62,83 @@ def pay_with_wallet(request):
         # data = send_bundle_response.json()
         # print(data)
 
-        # sms_headers = {
-        #     'Authorization': 'Bearer 1050|VDqcCUHwCBEbjcMk32cbdOhCFlavpDhy6vfgM4jU',
-        #     'Content-Type': 'application/json'
-        # }
-        #
-        # sms_url = 'https://webapp.usmsgh.com/api/sms/send'
-
-        new_transaction = models.IShareBundleTransaction.objects.create(
-            user=request.user,
-            bundle_number=phone_number,
-            offer=f"{bundle}MB",
-            reference=reference,
-            transaction_status="Pending"
-        )
-        new_transaction.save()
-        user.wallet -= float(amount)
-        user.save()
-        receiver_message = f"Your bundle purchase has been completed successfully. {bundle}MB has been credited to you by {request.user.phone}.\nReference: {reference}\n"
-        sms_message = f"Hello @{request.user.username}. Your bundle purchase has been completed successfully. {bundle}MB has been credited to {phone_number}.\nReference: {reference}\nCurrent Wallet Balance: {user.wallet}\nThank you for using Noble Data GH.\n\nThe Noble Data GH"
-
-        num_without_0 = phone_number[1:]
-        print(num_without_0)
-        receiver_body = {
-            'recipient': f"233{num_without_0}",
-            'sender_id': 'Noble Data',
-            'message': receiver_message
+        sms_headers = {
+            'Authorization': 'Bearer 1334|wroIm5YnQD6hlZzd8POtLDXxl4vQodCZNorATYGX',
+            'Content-Type': 'application/json'
         }
 
-        # response = requests.request('POST', url=sms_url, params=receiver_body, headers=sms_headers)
-        # print(response.text)
+        sms_url = 'https://webapp.usmsgh.com/api/sms/send'
 
-        sms_body = {
-            'recipient': f"233{request.user.phone}",
-            'sender_id': 'Noble Data',
-            'message': sms_message
+        send_bundle_response = helper.send_bundle(phone_number, bundle, reference)
+        try:
+            data = send_bundle_response.json()
+            print(data)
+        except:
+            return JsonResponse({'status': f'Something went wrong'})
+
+        sms_headers = {
+            'Authorization': 'Bearer 1334|wroIm5YnQD6hlZzd8POtLDXxl4vQodCZNorATYGX',
+            'Content-Type': 'application/json'
         }
 
-        # response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
+        sms_url = 'https://webapp.usmsgh.com/api/sms/send'
+        if send_bundle_response.status_code == 200:
+            if data["status"] == "Success":
+                new_transaction = models.IShareBundleTransaction.objects.create(
+                    user=request.user,
+                    bundle_number=phone_number,
+                    offer=f"{bundle}MB",
+                    reference=reference,
+                    transaction_status="Completed"
+                )
+                new_transaction.save()
+                user.wallet -= float(amount)
+                user.save()
+                receiver_message = f"Your bundle purchase has been completed successfully. {bundle}MB has been credited to you by {request.user.phone}.\nReference: {reference}\n"
+                sms_message = f"Hello @{request.user.username}. Your bundle purchase has been completed successfully. {bundle}MB has been credited to {phone_number}.\nReference: {reference}\nCurrent Wallet Balance: {user.wallet}\nThank you for using GH BAY."
 
-        # print(response.text)
+                num_without_0 = phone_number[1:]
+                print(num_without_0)
+                receiver_body = {
+                    'recipient': f"233{num_without_0}",
+                    'sender_id': 'GH BAY',
+                    'message': receiver_message
+                }
 
-        return JsonResponse({'status': 'Transaction Completed Successfully', 'icon': 'success'})
+                response = requests.request('POST', url=sms_url, params=receiver_body, headers=sms_headers)
+                print(response.text)
 
+                sms_body = {
+                    'recipient': f"233{request.user.phone}",
+                    'sender_id': 'GH BAY',
+                    'message': sms_message
+                }
+
+                response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
+
+                print(response.text)
+
+                return JsonResponse({'status': 'Transaction Completed Successfully', 'icon': 'success'})
+            else:
+                new_transaction = models.IShareBundleTransaction.objects.create(
+                    user=request.user,
+                    bundle_number=phone_number,
+                    offer=f"{bundle}MB",
+                    reference=reference,
+                    transaction_status="Failed"
+                )
+                new_transaction.save()
+                return JsonResponse({'status': 'Something went wrong', 'icon': 'error'})
+        else:
+            new_transaction = models.IShareBundleTransaction.objects.create(
+                user=request.user,
+                bundle_number=phone_number,
+                offer=f"{bundle}MB",
+                reference=reference,
+                transaction_status="Failed"
+            )
+            new_transaction.save()
+            return JsonResponse({'status': 'Something went wrong', 'icon': 'error'})
     return redirect('airtel-tigo')
 
 
@@ -966,16 +1000,76 @@ def paystack_webhook(request):
                     if models.IShareBundleTransaction.objects.filter(reference=reference, offer=f"{bundle}MB",
                                                                      transaction_status="Completed").exists():
                         return HttpResponse(status=200)
+
+
                     else:
-                        new_transaction = models.IShareBundleTransaction.objects.create(
-                            user=user,
-                            bundle_number=receiver,
-                            offer=f"{bundle}MB",
-                            reference=reference,
-                            transaction_status="Pending"
-                        )
-                        new_transaction.save()
-                        return HttpResponse(status=200)
+                        send_bundle_response = helper.send_bundle(receiver, bundle, reference)
+                        try:
+                            data = send_bundle_response.json()
+                            print(data)
+                        except:
+                            return HttpResponse(status=500)
+
+                        sms_headers = {
+                            'Authorization': 'Bearer 1334|wroIm5YnQD6hlZzd8POtLDXxl4vQodCZNorATYGX',
+                            'Content-Type': 'application/json'
+                        }
+
+                        sms_url = 'https://webapp.usmsgh.com/api/sms/send'
+                        if send_bundle_response.status_code == 200:
+                            if data["status"] == "Success":
+                                new_transaction = models.IShareBundleTransaction.objects.create(
+                                    user=user,
+                                    bundle_number=receiver,
+                                    offer=f"{bundle}MB",
+                                    reference=reference,
+                                    transaction_status="Completed"
+                                )
+                                new_transaction.save()
+                                receiver_message = f"Your bundle purchase has been completed successfully. {bundle}MB has been credited to you by {user.phone}.\nReference: {reference}\n"
+                                sms_message = f"Hello @{request.user.username}. Your bundle purchase has been completed successfully. {bundle}MB has been credited to {receiver}.\nReference: {reference}\nCurrent Wallet Balance: {user.wallet}\nThank you for using GH BAY."
+
+                                num_without_0 = receiver[1:]
+                                print(num_without_0)
+                                receiver_body = {
+                                    'recipient': f"233{num_without_0}",
+                                    'sender_id': 'GH BAY',
+                                    'message': receiver_message
+                                }
+
+                                response = requests.request('POST', url=sms_url, params=receiver_body, headers=sms_headers)
+                                print(response.text)
+
+                                sms_body = {
+                                    'recipient': f"233{request.user.phone}",
+                                    'sender_id': 'GH BAY',
+                                    'message': sms_message
+                                }
+
+                                response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
+
+                                print(response.text)
+                                return HttpResponse(status=200)
+                            else:
+                                new_transaction = models.IShareBundleTransaction.objects.create(
+                                    user=user,
+                                    bundle_number=receiver,
+                                    offer=f"{bundle}MB",
+                                    reference=reference,
+                                    transaction_status="Pending"
+                                )
+                                new_transaction.save()
+                                return HttpResponse(status=500)
+                        else:
+                            new_transaction = models.IShareBundleTransaction.objects.create(
+                                user=user,
+                                bundle_number=receiver,
+                                offer=f"{bundle}MB",
+                                reference=reference,
+                                transaction_status="Pending"
+                            )
+                            new_transaction.save()
+                            return HttpResponse(status=500)
                 elif channel == "mtn":
                     new_payment = models.Payment.objects.create(
                         user=user,
