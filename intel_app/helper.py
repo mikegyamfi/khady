@@ -51,7 +51,7 @@ def send_bundle(receiver, bundle_amount, reference):
     })
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': "2Ed4KL9leMcol26PfR4gfqxFMJH6wVW2cfDqLG0u"
+        'Authorization': config('TOKEN')
     }
 
     response = requests.request("POST", url, headers=headers, data=payload)
