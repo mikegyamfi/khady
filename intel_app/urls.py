@@ -22,7 +22,8 @@ urlpatterns = [
     path('delete', views.delete_custom_users, name='delete'),
     path('sms', views.send_change_sms, name='sms'),
 
-    path('mtn_admin', views.admin_mtn_history, name='mtn_admin'),
+    path('mtn_admin/<str:status>', views.admin_mtn_history, name='mtn_admin'),
+    path('excel_status/<str:status>/<str:to_change_to>', views.change_excel_status, name='excel_status'),
     path('at_admin', views.admin_at_history, name='at_admin'),
     path('bt_admin', views.admin_bt_history, name='bt_admin'),
     path('afa_admin', views.admin_afa_history, name='afa_admin'),

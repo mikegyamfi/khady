@@ -19,7 +19,16 @@ from django.contrib.auth.decorators import login_required
 from . import helper, models
 from .forms import UploadFileForm
 from .models import CustomUser
-from .resource import CustomUserResource
+from django.http import HttpResponse
+from openpyxl import Workbook
+from openpyxl.utils.dataframe import dataframe_to_rows
+from io import BytesIO
+from .models import MTNTransaction  # Adjust the import based on your model's location
+
+from openpyxl import load_workbook
+from openpyxl.utils.dataframe import dataframe_to_rows
+
+from openpyxl import load_workbook
 
 
 # Create your views here.
@@ -498,12 +507,110 @@ def verify_transaction(request, reference):
         return JsonResponse({'status': status})
 
 
+def change_excel_status(request, status, to_change_to):
+    transactions = models.MTNTransaction.objects.filter(
+        transaction_status=status) if to_change_to != "Completed" else models.MTNTransaction.objects.filter(
+        transaction_status=status)[:10]
+    for transaction in transactions:
+        transaction.transaction_status = to_change_to
+        transaction.save()
+        if to_change_to == "Completed":
+            transaction_number = transaction.user.phone
+            sms_headers = {
+                'Authorization': 'Bearer 1334|wroIm5YnQD6hlZzd8POtLDXxl4vQodCZNorATYGX',
+                'Content-Type': 'application/json'
+            }
+
+            sms_url = 'https://webapp.usmsgh.com/api/sms/send'
+            sms_message = f"Your MTN transaction has been completed. {transaction.bundle_number} has been credited with {transaction.offer}.\nTransaction Reference: {transaction.reference}"
+
+            sms_body = {
+                'recipient': f"233{transaction_number}",
+                'sender_id': 'GH BAY',
+                'message': sms_message
+            }
+            try:
+                response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
+                print(response.text)
+            except:
+                messages.success(request, f"Transaction Completed")
+                return redirect('mtn_admin', status=status)
+        else:
+            messages.success(request, f"Status changed from {status} to {to_change_to}")
+            return redirect("mtn_admin", status=status)
+    messages.success(request, f"Status changed from {status} to {to_change_to}")
+    return redirect("mtn_admin", status=status)
+
+
 @login_required(login_url='login')
-def admin_mtn_history(request):
+def admin_mtn_history(request, status):
     if request.user.is_staff and request.user.is_superuser:
-        all_txns = models.MTNTransaction.objects.filter().order_by('-transaction_date')
-        context = {'txns': all_txns}
+        if request.method == "POST":
+            from io import BytesIO
+            from openpyxl import load_workbook
+            from django.http import HttpResponse
+            import datetime
+
+            # Assuming `uploaded_file` is the Excel file uploaded by the user
+            uploaded_file = request.FILES['file'] if 'file' in request.FILES else None
+            if not uploaded_file:
+                messages.error(request, "No excel file found")
+                return redirect('mtn_admin', status=status)
+
+            # Load the uploaded Excel file into memory
+            excel_buffer = BytesIO(uploaded_file.read())
+            book = load_workbook(excel_buffer)
+            sheet = book.active  # Assuming the data is on the active sheet
+
+            # Assuming we have identified the recipient and data column indices
+            # Replace these with the actual indices if available
+            recipient_col_index = 1  # Example index for "RECIPIENT"
+            data_col_index = 2  # Example index for "DATA"
+
+            # Query your Django model
+            queryset = models.MTNTransaction.objects.filter(transaction_status="Pending")
+
+            # Determine the starting row for updates, preserving headers and any other pre-existing content
+            start_row = 2  # Assuming data starts from row 2
+
+            for record in queryset:
+                # Assuming 'bundle_number' and 'offer' fields exist in your model
+                recipient_value = str(record.bundle_number)  # Ensure it's a string to preserve formatting
+                data_value = record.offer  # Adjust based on actual field type
+                cleaned_data_value = float(data_value.replace('MB', ''))
+                data_value_gb = round(float(cleaned_data_value) / 1000, 2)
+
+                # Find next available row (avoid overwriting non-empty rows if necessary)
+                while sheet.cell(row=start_row, column=recipient_col_index).value is not None:
+                    start_row += 1
+
+                # Update cells
+                sheet.cell(row=start_row, column=recipient_col_index, value=recipient_value)
+                sheet.cell(row=start_row, column=data_col_index, value=data_value_gb)
+
+                # Update the record status, if necessary
+                record.transaction_status = "Processing"
+                record.save()
+
+            # Save the modified Excel file to the buffer
+            excel_buffer.seek(0)  # Reset buffer position
+            book.save(excel_buffer)
+
+            # Prepare the response with the modified Excel file
+            excel_buffer.seek(0)  # Reset buffer position to read the content
+            response = HttpResponse(excel_buffer.getvalue(),
+                                    content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = 'attachment; filename={}.xlsx'.format(
+                datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S"))
+
+            return response
+
+        all_txns = models.MTNTransaction.objects.filter(transaction_status=status).order_by('-transaction_date')
+        context = {'txns': all_txns, 'status': status}
         return render(request, "layouts/services/mtn_admin.html", context=context)
+    else:
+        messages.error(request, "Access Denied")
+        return redirect('mtn_admin', status=status)
 
 
 @login_required(login_url='login')
@@ -543,7 +650,7 @@ def mark_as_sent(request, pk):
         }
 
         sms_url = 'https://webapp.usmsgh.com/api/sms/send'
-        sms_message = f"Your AT transaction has been completed. {txn.bundle_number} has been credited with {txn.offer}.\nTransaction Reference: {txn.reference}"
+        sms_message = f"Your MTN transaction has been completed. {txn.bundle_number} has been credited with {txn.offer}.\nTransaction Reference: {txn.reference}"
 
         sms_body = {
             'recipient': f"233{txn.user.phone}",
@@ -555,9 +662,9 @@ def mark_as_sent(request, pk):
             print(response.text)
         except:
             messages.success(request, f"Transaction Completed")
-            return redirect('mtn_admin')
+            return redirect('mtn_admin', status="Pending")
         messages.success(request, f"Transaction Completed")
-        return redirect('mtn_admin')
+        return redirect('mtn_admin', status="Pending")
 
 
 @login_required(login_url='login')
@@ -914,6 +1021,71 @@ def populate_custom_users_from_excel(request):
     return render(request, 'layouts/import_users.html', {'form': form})
 
 
+@csrf_exempt
+def export_unknown_transactions(request):
+    existing_excel_path = 'wallet_api_app/ALL PACKAGES LATEST.xlsx'  # Update with your file path
+
+    # Load the existing Excel file using openpyxl.Workbook
+    book = load_workbook(existing_excel_path)
+
+    # Get the active sheet
+    sheet_name = 'Sheet1'
+    sheet = book[sheet_name] if sheet_name in book.sheetnames else book.active
+
+    # Clear existing data from the sheet (excluding headers)
+    for row in sheet.iter_rows(min_row=2, max_col=sheet.max_column, max_row=sheet.max_row):
+        for cell in row:
+            cell.value = None
+
+    # Query your Django model for the first 200 records with batch_id 'Unknown' and ordered by status and date
+    queryset = models.MTNTransaction.objects.filter(batch_id='Unknown', status="Undelivered")[:50]
+
+    # Process transactions with batch_id 'Unknown'
+    counter = 0
+
+    for record in queryset:
+        print(counter)
+
+        # Extract required fields from your Django model
+        bundle_volume_mb = record.bundle_volume  # Assuming a default of 0 if datavolume is missing
+        number = str(record.number)  # Convert to string to keep leading zeros
+
+        # Convert datavolume from MB to GB
+        bundle_volume_gb = round(float(bundle_volume_mb) / 1000)
+
+        # Find the row index where you want to populate the data (adjust as needed)
+        target_row = 2 + counter  # Assuming the data starts from row 2
+
+        # Populate the specific cells with the new data
+        sheet.cell(row=target_row, column=1, value=number)  # Keep leading zeros
+        sheet.cell(row=target_row, column=2, value=float(bundle_volume_gb))  # Convert to float
+
+        # Update 'batch_id' to 'processing' in your Django model
+        record.batch_id = 'accepted'
+        record.status = 'Processing'
+        record.save()
+
+        counter += 1
+
+    print(f"Total transactions to export: {counter}")
+
+    # Save changes to the existing Excel file
+    book.save(existing_excel_path)
+
+    # You can continue with the response as needed
+    excel_buffer = BytesIO()
+
+    # Save the workbook to the buffer
+    book.save(excel_buffer)
+
+    # Create a response with the Excel file
+    response = HttpResponse(excel_buffer.getvalue(),
+                            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename={datetime.datetime.now()}.xlsx'
+
+    return response
+
+
 def delete_custom_users(request):
     CustomUser.objects.all().delete()
     return HttpResponseRedirect('Done')
@@ -1037,7 +1209,8 @@ def paystack_webhook(request):
                                     'message': receiver_message
                                 }
 
-                                response = requests.request('POST', url=sms_url, params=receiver_body, headers=sms_headers)
+                                response = requests.request('POST', url=sms_url, params=receiver_body,
+                                                            headers=sms_headers)
                                 print(response.text)
 
                                 sms_body = {
@@ -1173,7 +1346,8 @@ def paystack_webhook(request):
                         cart_total_price += item.product.selling_price * item.product_qty
                     print(cart_total_price)
                     print(user.wallet)
-                    if models.Order.objects.filter(tracking_number=reference, message=message, payment_id=reference).exists():
+                    if models.Order.objects.filter(tracking_number=reference, message=message,
+                                                   payment_id=reference).exists():
                         return HttpResponse(status=200)
                     order_form = models.Order.objects.create(
                         user=user,
