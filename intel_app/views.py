@@ -605,7 +605,7 @@ def admin_mtn_history(request, status):
 
             return response
 
-        all_txns = models.MTNTransaction.objects.filter(transaction_status=status).order_by('-transaction_date')
+        all_txns = models.MTNTransaction.objects.filter(transaction_status=status).order_by('-transaction_date')[:800]
         context = {'txns': all_txns, 'status': status}
         return render(request, "layouts/services/mtn_admin.html", context=context)
     else:
