@@ -510,7 +510,7 @@ def verify_transaction(request, reference):
 def change_excel_status(request, status, to_change_to):
     transactions = models.MTNTransaction.objects.filter(
         transaction_status=status) if to_change_to != "Completed" else models.MTNTransaction.objects.filter(
-        transaction_status=status)[:10]
+        transaction_status=status).order_by('transaction_date')[:10]
     for transaction in transactions:
         transaction.transaction_status = to_change_to
         transaction.save()
