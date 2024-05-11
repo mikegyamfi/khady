@@ -77,6 +77,10 @@ admin.site.register(models.BigTimeBundlePrice)
 admin.site.register(models.AgentBigTimeBundlePrice)
 admin.site.register(models.AFARegistration)
 admin.site.register(models.AFARegistration2)
+admin.site.register(models.ATMinuteTransaction)
+admin.site.register(models.ATCreditPrice)
+admin.site.register(models.AfaCreditTransaction)
+admin.site.register(models.AfaCreditPrice)
 
 #########################################################################
 admin.site.register(models.Category)

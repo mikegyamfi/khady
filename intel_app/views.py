@@ -469,6 +469,24 @@ def mtn_history(request):
 
 
 @login_required(login_url='login')
+def at_credit_history(request):
+    user_transactions = models.ATMinuteTransaction.objects.filter(user=request.user).order_by('transaction_date').reverse()
+    header = "AT Minutes Transactions"
+    net = "at_min"
+    context = {'txns': user_transactions, "header": header, "net": net}
+    return render(request, "layouts/history.html", context=context)
+
+
+@login_required(login_url='login')
+def afa_credit_history(request):
+    user_transactions = models.AfaCreditTransaction.objects.filter(user=request.user).order_by('transaction_date').reverse()
+    header = "Afa Minutes Transaction"
+    net = "afa_min"
+    context = {'txns': user_transactions, "header": header, "net": net}
+    return render(request, "layouts/history.html", context=context)
+
+
+@login_required(login_url='login')
 def big_time_history(request):
     user_transactions = models.BigTimeTransaction.objects.filter(user=request.user).order_by(
         'transaction_date').reverse()
@@ -616,7 +634,7 @@ def admin_mtn_history(request, status):
 @login_required(login_url='login')
 def admin_at_history(request):
     if request.user.is_staff and request.user.is_superuser:
-        all_txns = models.IShareBundleTransaction.objects.filter().order_by('-transaction_date')
+        all_txns = models.IShareBundleTransaction.objects.filter().order_by('-transaction_date')[:1000]
         context = {'txns': all_txns}
         return render(request, "layouts/services/at_admin.html", context=context)
 
@@ -624,7 +642,7 @@ def admin_at_history(request):
 @login_required(login_url='login')
 def admin_bt_history(request):
     if request.user.is_staff and request.user.is_superuser:
-        all_txns = models.BigTimeTransaction.objects.filter().order_by('-transaction_date')
+        all_txns = models.BigTimeTransaction.objects.filter().order_by('-transaction_date')[:1000]
         context = {'txns': all_txns}
         return render(request, "layouts/services/bt_admin.html", context=context)
 
@@ -632,9 +650,25 @@ def admin_bt_history(request):
 @login_required(login_url='login')
 def admin_afa_history(request):
     if request.user.is_staff and request.user.is_superuser:
-        all_txns = models.AFARegistration2.objects.filter().order_by('-transaction_date')
+        all_txns = models.AFARegistration2.objects.filter().order_by('-transaction_date')[:1000]
         context = {'txns': all_txns}
         return render(request, "layouts/services/afa_admin.html", context=context)
+
+
+@login_required(login_url='login')
+def admin_afa_min_history(request):
+    if request.user.is_staff and request.user.is_superuser:
+        all_txns = models.AfaCreditTransaction.objects.filter().order_by('-transaction_date')[:1000]
+        context = {'txns': all_txns}
+        return render(request, "layouts/services/afa_min_admin.html", context=context)
+
+
+@login_required(login_url='login')
+def admin_at_min_history(request):
+    if request.user.is_staff and request.user.is_superuser:
+        all_txns = models.ATMinuteTransaction.objects.filter().order_by('-transaction_date')[:1000]
+        context = {'txns': all_txns}
+        return render(request, "layouts/services/at_min_admin.html", context=context)
 
 
 @login_required(login_url='login')
@@ -725,6 +759,66 @@ def bt_mark_as_sent(request, pk):
             return redirect('bt_admin')
         messages.success(request, f"Transaction Completed")
         return redirect('bt_admin')
+
+
+@login_required(login_url='login')
+def afa_min_mark_as_sent(request, pk):
+    if request.user.is_staff and request.user.is_superuser:
+        txn = models.AfaCreditTransaction.objects.filter(id=pk).first()
+        print(txn)
+        txn.transaction_status = "Completed"
+        txn.save()
+        sms_headers = {
+            'Authorization': 'Bearer 1334|wroIm5YnQD6hlZzd8POtLDXxl4vQodCZNorATYGX',
+            'Content-Type': 'application/json'
+        }
+
+        sms_url = 'https://webapp.usmsgh.com/api/sms/send'
+        sms_message = f"Your AFA Minutes transaction has been completed. {txn.bundle_number} has been credited with {txn.offer}.\nTransaction Reference: {txn.reference}"
+
+        sms_body = {
+            'recipient': f"233{txn.user.phone}",
+            'sender_id': 'GH BAY',
+            'message': sms_message
+        }
+        try:
+            response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
+            print(response.text)
+        except:
+            messages.success(request, f"Transaction Completed")
+            return redirect('afa_min_admin')
+        messages.success(request, f"Transaction Completed")
+        return redirect('afa_min_admin')
+
+
+@login_required(login_url='login')
+def at_min_mark_as_sent(request, pk):
+    if request.user.is_staff and request.user.is_superuser:
+        txn = models.ATMinuteTransaction.objects.filter(id=pk).first()
+        print(txn)
+        txn.transaction_status = "Completed"
+        txn.save()
+        sms_headers = {
+            'Authorization': 'Bearer 1334|wroIm5YnQD6hlZzd8POtLDXxl4vQodCZNorATYGX',
+            'Content-Type': 'application/json'
+        }
+
+        sms_url = 'https://webapp.usmsgh.com/api/sms/send'
+        sms_message = f"Your AT Minutes transaction has been completed. {txn.bundle_number} has been credited with {txn.offer}.\nTransaction Reference: {txn.reference}"
+
+        sms_body = {
+            'recipient': f"233{txn.user.phone}",
+            'sender_id': 'GH BAY',
+            'message': sms_message
+        }
+        try:
+            response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
+            print(response.text)
+        except:
+            messages.success(request, f"Transaction Completed")
+            return redirect('at_min_admin')
+        messages.success(request, f"Transaction Completed")
+        return redirect('at_min_admin')
 
 
 @login_required(login_url='login')
@@ -949,6 +1043,74 @@ def mtn_mark_completed(request, reference):
             return redirect('mtn_history')
 
 
+@login_required(login_url='login')
+def afa_minutes_mark_completed(request, reference):
+    if request.user.is_superuser:
+        txn = models.AfaCreditTransaction.objects.filter(reference=reference).first()
+        if txn:
+            txn.transaction_status = "Completed"
+            txn.save()
+
+            number = txn.user.phone
+            bundle = txn.offer
+
+            sms_headers = {
+                'Authorization': 'Bearer 1334|wroIm5YnQD6hlZzd8POtLDXxl4vQodCZNorATYGX',
+                'Content-Type': 'application/json'
+            }
+
+            sms_url = 'https://webapp.usmsgh.com/api/sms/send'
+            sms_message = f"Hello,\nYour Afa Minutes transaction has been completed.\n{bundle} minutes sent to {txn.bundle_number}.\nReference: {reference}.\nThank you for using GH BAY"
+
+            sms_body = {
+                'recipient': f"233{number}",
+                'sender_id': 'GH BAY',
+                'message': sms_message
+            }
+            try:
+                response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
+                print(response.text)
+            except:
+                messages.success(request, f"Transaction Completed")
+                return redirect('afa-credit-history')
+            messages.success(request, f"Transaction Completed")
+            return redirect('afa-credit-history')
+
+
+@login_required(login_url='login')
+def at_minutes_mark_completed(request, reference):
+    if request.user.is_superuser:
+        txn = models.ATMinuteTransaction.objects.filter(reference=reference).first()
+        if txn:
+            txn.transaction_status = "Completed"
+            txn.save()
+
+            number = txn.user.phone
+            bundle = txn.offer
+
+            sms_headers = {
+                'Authorization': 'Bearer 1334|wroIm5YnQD6hlZzd8POtLDXxl4vQodCZNorATYGX',
+                'Content-Type': 'application/json'
+            }
+
+            sms_url = 'https://webapp.usmsgh.com/api/sms/send'
+            sms_message = f"Hello,\nYour AT Minutes transaction has been completed.\n{bundle} minutes sent to {txn.bundle_number}.\nReference: {reference}.\nThank you for using GH BAY"
+
+            sms_body = {
+                'recipient': f"233{number}",
+                'sender_id': 'GH BAY',
+                'message': sms_message
+            }
+            try:
+                response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
+                print(response.text)
+            except:
+                messages.success(request, f"Transaction Completed")
+                return redirect('afa-credit-history')
+            messages.success(request, f"Transaction Completed")
+            return redirect('afa-credit-history')
+
+
 # def import_users(request):
 #     if request.method == 'POST':
 #         form = UploadFileForm(request.POST, request.FILES)
@@ -1121,6 +1283,190 @@ def send_change_sms(request):
     return redirect('home')
 
 
+@login_required(login_url='login')
+def pay_with_wallet_minutes(request):
+    if request.method == "POST":
+        admin = models.AdminInfo.objects.filter().first().phone_number
+        user = models.CustomUser.objects.get(id=request.user.id)
+        phone_number = request.POST.get("phone")
+        amount = request.POST.get("amount")
+        reference = request.POST.get("reference")
+        if user.wallet is None:
+            return JsonResponse(
+                {'status': f'Your wallet balance is low. Contact the admin to recharge. Admin Contact Info: 0{admin}'})
+        elif user.wallet <= 0 or user.wallet < float(amount):
+            return JsonResponse(
+                {'status': f'Your wallet balance is low. Contact the admin to recharge. Admin Contact Info: 0{admin}'})
+        print(phone_number)
+        print(amount)
+        print(reference)
+        if user.status == "User":
+            minutes = models.ATCreditPrice.objects.get(price=float(amount)).minutes
+        else:
+            minutes = models.ATCreditPrice.objects.get(price=float(amount)).minutes
+
+        new_transaction = models.ATMinuteTransaction.objects.create(
+            user=request.user,
+            bundle_number=phone_number,
+            offer=f"{minutes} Minutes",
+            reference=reference,
+            transaction_status="Pending"
+        )
+        new_transaction.save()
+        user.wallet -= float(amount)
+        user.save()
+
+        return JsonResponse({'status': 'Transaction Received Successfully', 'icon': 'success'})
+    return redirect('at_minutes')
+
+
+@login_required(login_url='login')
+def afa_credit_pay_with_wallet(request):
+    if request.method == "POST":
+        admin = models.AdminInfo.objects.filter().first().phone_number
+        user = models.CustomUser.objects.get(id=request.user.id)
+        phone_number = request.POST.get("phone")
+        amount = request.POST.get("amount")
+        reference = request.POST.get("reference")
+        if user.wallet is None:
+            return JsonResponse(
+                {'status': f'Your wallet balance is low. Contact the admin to recharge. Admin Contact Info: 0{admin}'})
+        elif user.wallet <= 0 or user.wallet < float(amount):
+            return JsonResponse(
+                {'status': f'Your wallet balance is low. Contact the admin to recharge. Admin Contact Info: 0{admin}'})
+        print(phone_number)
+        print(amount)
+        print(reference)
+        if user.status == "User":
+            minutes = models.AfaCreditPrice.objects.get(price=float(amount)).minutes
+        else:
+            minutes = models.AfaCreditPrice.objects.get(price=float(amount)).minutes
+
+        new_transaction = models.AfaCreditTransaction.objects.create(
+            user=request.user,
+            bundle_number=phone_number,
+            offer=f"{minutes} Minutes",
+            reference=reference,
+            transaction_status="Pending"
+        )
+        new_transaction.save()
+        user.wallet -= float(amount)
+        user.save()
+
+        return JsonResponse({'status': 'Transaction Received Successfully', 'icon': 'success'})
+    return redirect('afa_credit')
+
+
+@login_required(login_url='login')
+def airtel_tigo_minutes(request):
+    user = models.CustomUser.objects.get(id=request.user.id)
+    status = user.status
+    form = forms.ATCreditForm()
+    reference = helper.ref_generator()
+    db_user_id = request.user.id
+    user_email = request.user.email
+    if request.method == "POST":
+        form = forms.ATCreditForm(data=request.POST)
+        payment_reference = request.POST.get("reference")
+        amount_paid = request.POST.get("amount")
+        new_payment = models.Payment.objects.create(
+            user=request.user,
+            reference=payment_reference,
+            amount=amount_paid,
+            transaction_date=datetime.now(),
+            transaction_status="Completed"
+        )
+        new_payment.save()
+        print("payment saved")
+        print("form valid")
+        phone_number = request.POST.get("phone")
+        offer = request.POST.get("amount")
+        print(offer)
+        if user.status == "User":
+            bundle = models.ATCreditPrice.objects.get(price=float(offer)).minutes
+        else:
+            bundle = models.ATCreditPrice.objects.get(price=float(offer)).minutes
+        new_transaction = models.ATMinuteTransaction.objects.create(
+            user=request.user,
+            bundle_number=phone_number,
+            offer=f"{bundle} Minutes",
+            reference=payment_reference,
+            transaction_status="Pending"
+        )
+        print("created")
+        new_transaction.save()
+
+        print("===========================")
+        print(phone_number)
+        print(bundle)
+        print("--------------------")
+        # send_bundle_response = helper.send_bundle(request.user, phone_number, bundle, payment_reference)
+        # print("********************")
+        # data = send_bundle_response.json()
+        #
+        # print(data)
+        return JsonResponse({'status': 'Transaction Completed Successfully', 'icon': 'success'})
+    user = models.CustomUser.objects.get(id=request.user.id)
+    context = {"form": form, "ref": reference, 'id': db_user_id, "email": user_email,
+               "wallet": 0 if user.wallet is None else user.wallet}
+    return render(request, "layouts/services/at_credit.html", context=context)
+
+
+@login_required(login_url='login')
+def afa_credit(request):
+    user = models.CustomUser.objects.get(id=request.user.id)
+    status = user.status
+    form = forms.AfaCreditForm()
+    reference = helper.ref_generator()
+    db_user_id = request.user.id
+    user_email = request.user.email
+    if request.method == "POST":
+        form = forms.AfaCreditForm(data=request.POST)
+        payment_reference = request.POST.get("reference")
+        amount_paid = request.POST.get("amount")
+        new_payment = models.Payment.objects.create(
+            user=request.user,
+            reference=payment_reference,
+            amount=amount_paid,
+            transaction_date=datetime.now(),
+            transaction_status="Completed"
+        )
+        new_payment.save()
+        print("payment saved")
+        print("form valid")
+        phone_number = request.POST.get("phone")
+        offer = request.POST.get("amount")
+        print(offer)
+        if user.status == "User":
+            bundle = models.AfaCreditPrice.objects.get(price=float(offer)).minutes
+        else:
+            bundle = models.AfaCreditPrice.objects.get(price=float(offer)).minutes
+        new_transaction = models.AfaCreditTransaction.objects.create(
+            user=request.user,
+            bundle_number=phone_number,
+            offer=f"{bundle} Minutes",
+            reference=payment_reference,
+            transaction_status="Pending"
+        )
+        print("created")
+        new_transaction.save()
+
+        print("===========================")
+        print(phone_number)
+        print(bundle)
+        print("--------------------")
+        # send_bundle_response = helper.send_bundle(request.user, phone_number, bundle, payment_reference)
+        # print("********************")
+        # data = send_bundle_response.json()
+        #
+        # print(data)
+        return JsonResponse({'status': 'Transaction Received Successfully', 'icon': 'success'})
+    user = models.CustomUser.objects.get(id=request.user.id)
+    context = {"form": form, "ref": reference, 'id': db_user_id, "email": user_email,
+               "wallet": 0 if user.wallet is None else user.wallet}
+    return render(request, "layouts/services/afa_credit.html", context=context)
+
+
 @csrf_exempt
 def paystack_webhook(request):
     if request.method == "POST":
@@ -1268,6 +1614,56 @@ def paystack_webhook(request):
                         user=user,
                         bundle_number=receiver,
                         offer=f"{bundle}MB",
+                        reference=reference,
+                    )
+                    new_mtn_transaction.save()
+                    return HttpResponse(status=200)
+                elif channel == "at_min":
+                    new_payment = models.Payment.objects.create(
+                        user=user,
+                        reference=reference,
+                        amount=paid_amount,
+                        transaction_date=datetime.now(),
+                        transaction_status="Pending"
+                    )
+                    new_payment.save()
+
+                    if user.status == "User":
+                        minutes = models.ATCreditPrice.objects.get(price=float(real_amount)).minutes
+                    else:
+                        minutes = models.ATCreditPrice.objects.get(price=float(real_amount)).minutes
+
+                    print(receiver)
+
+                    new_mtn_transaction = models.ATMinuteTransaction.objects.create(
+                        user=user,
+                        bundle_number=receiver,
+                        offer=f"{minutes} Minutes",
+                        reference=reference,
+                    )
+                    new_mtn_transaction.save()
+                    return HttpResponse(status=200)
+                elif channel == "afa_credit":
+                    new_payment = models.Payment.objects.create(
+                        user=user,
+                        reference=reference,
+                        amount=paid_amount,
+                        transaction_date=datetime.now(),
+                        transaction_status="Pending"
+                    )
+                    new_payment.save()
+
+                    if user.status == "User":
+                        minutes = models.AfaCreditPrice.objects.get(price=float(real_amount)).minutes
+                    else:
+                        minutes = models.AfaCreditPrice.objects.get(price=float(real_amount)).minutes
+
+                    print(receiver)
+
+                    new_mtn_transaction = models.AfaCreditTransaction.objects.create(
+                        user=user,
+                        bundle_number=receiver,
+                        offer=f"{minutes} Minutes",
                         reference=reference,
                     )
                     new_mtn_transaction.save()

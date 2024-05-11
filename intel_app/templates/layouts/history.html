@@ -18,6 +18,8 @@
                     <a href ="{% url 'mtn-history' %}" class="btn btn-sm btn-outline-primary">MTN</a>
                     <a href ="{% url 'bt-history' %}" class="btn btn-sm btn-outline-primary">AT Big Time</a>
                      <a href ="{% url 'afa-history' %}" class="btn btn-sm btn-outline-primary">AFA</a>
+                    <a href="{% url 'at-credit-history' %}" class="btn btn-sm btn-outline-primary">AT Minutes</a>
+                    <a href="{% url 'afa-credit-history' %}" class="btn btn-sm btn-outline-primary">AFA Minutes</a>
                 </div>
                 {% elif net == "mtn" %}
                 <div>
@@ -25,10 +27,32 @@
                     <a href="{% url 'history' %}" class="btn btn-sm btn-outline-primary">AirtelTigo</a>
                     <a href="{% url 'bt-history' %}" class="btn btn-sm btn-outline-primary">AT Big Time</a>
                      <a href ="{% url 'afa-history' %}" class="btn btn-sm btn-outline-primary">AFA</a>
+                    <a href="{% url 'at-credit-history' %}" class="btn btn-sm btn-outline-primary">AT Minutes</a>
+                    <a href="{% url 'afa-credit-history' %}" class="btn btn-sm btn-outline-primary">AFA Minutes</a>
                 </div>
                 {% elif net == "bt" %}
                 <div>
                     <a href="{% url 'bt-history' %}" class="btn btn-sm btn-primary">AT Big Time</a>
+                    <a href ="{% url 'mtn-history' %}" class="btn btn-sm btn-outline-primary">MTN</a>
+                    <a href="{% url 'history' %}" class="btn btn-sm btn-outline-primary">AirtelTigo</a>
+                     <a href ="{% url 'afa-history' %}" class="btn btn-sm btn-outline-primary">AFA</a>
+                    <a href="{% url 'at-credit-history' %}" class="btn btn-sm btn-outline-primary">AT Minutes</a>
+                    <a href="{% url 'afa-credit-history' %}" class="btn btn-sm btn-outline-primary">AFA Minutes</a>
+                </div>
+                {% elif net == "at_min" %}
+                <div>
+                    <a href="{% url 'at-credit-history' %}" class="btn btn-sm btn-primary">AT Minutes</a>
+                    <a href="{% url 'bt-history' %}" class="btn btn-sm btn-outline-primary">AT Big Time</a>
+                    <a href ="{% url 'mtn-history' %}" class="btn btn-sm btn-outline-primary">MTN</a>
+                    <a href="{% url 'history' %}" class="btn btn-sm btn-outline-primary">AirtelTigo</a>
+                     <a href ="{% url 'afa-history' %}" class="btn btn-sm btn-outline-primary">AFA</a>
+                    <a href="{% url 'afa-credit-history' %}" class="btn btn-sm btn-outline-primary">AFA Minutes</a>
+                </div>
+                {% elif net == "afa_min" %}
+                <div>
+                    <a href="{% url 'afa-credit-history' %}" class="btn btn-sm btn-primary">AFA Minutes</a>
+                    <a href="{% url 'at-credit-history' %}" class="btn btn-sm btn-outline-primary">AT Minutes</a>
+                    <a href="{% url 'bt-history' %}" class="btn btn-sm btn-outline-primary">AT Big Time</a>
                     <a href ="{% url 'mtn-history' %}" class="btn btn-sm btn-outline-primary">MTN</a>
                     <a href="{% url 'history' %}" class="btn btn-sm btn-outline-primary">AirtelTigo</a>
                      <a href ="{% url 'afa-history' %}" class="btn btn-sm btn-outline-primary">AFA</a>
@@ -39,6 +63,8 @@
                     <a href ="{% url 'mtn-history' %}" class="btn btn-sm btn-outline-primary">MTN</a>
                     <a href="{% url 'history' %}" class="btn btn-sm btn-outline-primary">AirtelTigo</a>
                      <a href ="{% url 'bt-history' %}" class="btn btn-sm btn-outline-primary">AT Big Time</a>
+                      <a href="{% url 'at-credit-history' %}" class="btn btn-sm btn-outline-primary">AT Minutes</a>
+                      <a href="{% url 'afa-credit-history' %}" class="btn btn-sm btn-outline-primary">AFA Minutes</a>
                 </div>
                 {% endif %}
 

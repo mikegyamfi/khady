@@ -35,20 +35,20 @@
             {% for error in form.non_field_errors %}
             <small style="display: block; color: red">{{ error }}</small>
             {% endfor %}
-            <form method="post" id="creditForm">
+            <form method="post">
               {% csrf_token %}
-              <div class="form-row">
-                <div class="form-group col-md-6">
-                  <label>User</label>
-                  {{form.user}}
-                </div>
-                <div class="form-group col-md-6">
-                  <label>Amount</label>
-                  {{ form.amount }}
-                </div>
-                  </div>
-              <button type="button" id="confirmBtn" class="btn btn-success">Confirm</button>
+  <p>Confirm credit to {{ user_to_credit.username }} for ${{ amount }}</p>
+  <input type="hidden" name="user_id" value="{{ user_to_credit.id }}">
+  <input type="hidden" name="amount" value="{{ amount }}">
+  <button type="submit" name="confirm_credit">Confirm</button>
+  <a href="{% url 'credit_user' %}">Cancel</a>
             </form>
+
+            <h3>User Details</h3>
+<p>User ID: {{ user_to_credit.id }}</p>
+<p>Username: {{ user_to_credit.username }}</p>
+<p>Email: {{ user_to_credit.email }}</p>
+<p>Amount: ${{ amount }}</p>
           </div>
       </div>
   </div> <!-- .page-section -->
@@ -62,25 +62,7 @@
 {% block scripts %}
 
 
-<script>
-    $(document).ready(function() {
-      $('#confirmBtn').click(function() {
-              let user = $(".airtime-input").val()
-        Swal.fire({
-          title: 'Confirm Credit',
-          text: 'Are you sure you want to credit this user: ' + user + '?',
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonText: 'Confirm',
-          cancelButtonText: 'Cancel'
-        }).then((result) => {
-          if (result.isConfirmed) {
-            $('#creditForm').submit();
-          }
-        });
-      });
-    });
-  </script>
+
 
 {% endblock scripts %}
 

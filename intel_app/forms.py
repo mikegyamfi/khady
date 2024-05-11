@@ -56,6 +56,30 @@ class CreditUserForm(forms.Form):
     amount = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'GHS 100'}))
 
 
+class ATCreditForm(forms.Form):
+    phone_number = forms.IntegerField(
+        widget=forms.NumberInput(attrs={'class': 'form-control phone', 'placeholder': '0270000000'}))
+    offers = forms.ModelChoiceField(queryset=models.ATCreditPrice.objects.all().order_by('price'),
+                                    to_field_name='price', empty_label=None,
+                                    widget=forms.Select(attrs={'class': 'form-control airtime-input'}))
+
+    # def __init__(self, status, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     if status == "User":
+    #         self.fields['offers'].queryset = models.BigTimeBundlePrice.objects.all()
+    #     elif status == "Agent":
+    #         self.fields['offers'].queryset = models.AgentBigTimeBundlePrice.objects.all()
+    #     # self.fields['size'].queryset = models.Size.objects.filter(domain=domain)
+
+
+class AfaCreditForm(forms.Form):
+    phone_number = forms.IntegerField(
+        widget=forms.NumberInput(attrs={'class': 'form-control phone', 'placeholder': '0240000000'}))
+    offers = forms.ModelChoiceField(queryset=models.AfaCreditPrice.objects.all().order_by('price'),
+                                    to_field_name='price', empty_label=None,
+                                    widget=forms.Select(attrs={'class': 'form-control airtime-input'}))
+
+
 class UploadFileForm(forms.Form):
     file = forms.FileField(label='Select an Excel file', help_text='Allowed file formats: .xlsx')
 

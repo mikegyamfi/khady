@@ -43,7 +43,7 @@ class AdminInfo(models.Model):
     )
     payment_channel = models.CharField(max_length=250, choices=choices)
     afa_price = models.FloatField(null=True, blank=True)
-    
+
 
 class IShareBundleTransaction(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
@@ -64,7 +64,7 @@ class AgentIshareBundlePrice(models.Model):
 
     def __str__(self):
         if self.bundle_volume >= 1000:
-            return f"GHS{self.price} - {self.bundle_volume/1000}GB"
+            return f"GHS{self.price} - {self.bundle_volume / 1000}GB"
         return f"GHS{self.price} - {self.bundle_volume}MB"
 
 
@@ -74,7 +74,7 @@ class SuperAgentIshareBundlePrice(models.Model):
 
     def __str__(self):
         if self.bundle_volume >= 1000:
-            return f"GHS{self.price} - {self.bundle_volume/1000}GB"
+            return f"GHS{self.price} - {self.bundle_volume / 1000}GB"
         return f"GHS{self.price} - {self.bundle_volume}MB"
 
 
@@ -84,7 +84,7 @@ class IshareBundlePrice(models.Model):
 
     def __str__(self):
         if self.bundle_volume >= 1000:
-            return f"GHS{self.price} - {self.bundle_volume/1000}GB"
+            return f"GHS{self.price} - {self.bundle_volume / 1000}GB"
         return f"GHS{self.price} - {self.bundle_volume}MB"
 
 
@@ -94,7 +94,7 @@ class AgentBigTimeBundlePrice(models.Model):
 
     def __str__(self):
         if self.bundle_volume >= 1000:
-            return f"GHS{self.price} - {self.bundle_volume/1000}GB"
+            return f"GHS{self.price} - {self.bundle_volume / 1000}GB"
         return f"GHS{self.price} - {self.bundle_volume}MB"
 
 
@@ -104,7 +104,7 @@ class SuperAgentBigTimeBundlePrice(models.Model):
 
     def __str__(self):
         if self.bundle_volume >= 1000:
-            return f"GHS{self.price} - {self.bundle_volume/1000}GB"
+            return f"GHS{self.price} - {self.bundle_volume / 1000}GB"
         return f"GHS{self.price} - {self.bundle_volume}MB"
 
 
@@ -114,7 +114,7 @@ class BigTimeBundlePrice(models.Model):
 
     def __str__(self):
         if self.bundle_volume >= 1000:
-            return f"GHS{self.price} - {self.bundle_volume/1000}GB"
+            return f"GHS{self.price} - {self.bundle_volume / 1000}GB"
         return f"GHS{self.price} - {self.bundle_volume}MB"
 
 
@@ -174,7 +174,7 @@ class AFARegistration2(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.phone_number} - {self.gh_card_number}"
-    
+
 
 class MTNTransaction(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
@@ -201,7 +201,7 @@ class AgentMTNBundlePrice(models.Model):
 
     def __str__(self):
         if self.bundle_volume >= 1000:
-            return f"GHS{self.price} - {self.bundle_volume/1000}GB"
+            return f"GHS{self.price} - {self.bundle_volume / 1000}GB"
         return f"GHS{self.price} - {self.bundle_volume}MB"
 
 
@@ -211,7 +211,7 @@ class SuperAgentMTNBundlePrice(models.Model):
 
     def __str__(self):
         if self.bundle_volume >= 1000:
-            return f"GHS{self.price} - {self.bundle_volume/1000}GB"
+            return f"GHS{self.price} - {self.bundle_volume / 1000}GB"
         return f"GHS{self.price} - {self.bundle_volume}MB"
 
 
@@ -219,12 +219,11 @@ class MTNBundlePrice(models.Model):
     price = models.FloatField(null=False, blank=False)
     bundle_volume = models.FloatField(null=False, blank=False)
 
-
     def __str__(self):
         if self.bundle_volume >= 1000:
-            return f"GHS{self.price} - {self.bundle_volume/1000}GB"
+            return f"GHS{self.price} - {self.bundle_volume / 1000}GB"
         return f"GHS{self.price} - {self.bundle_volume}MB"
-    
+
 
 class Payment(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
@@ -246,6 +245,54 @@ class TopUpRequest(models.Model):
     status = models.BooleanField(default=False, blank=False, null=False)
     date = models.DateTimeField(auto_now_add=True)
     credited_at = models.DateTimeField(auto_now_add=True)
+
+
+class AfaCreditPrice(models.Model):
+    price = models.FloatField(null=False, blank=False)
+    minutes = models.FloatField(null=False, blank=False)
+
+    def __str__(self):
+        return f"GHS{self.price} - {self.minutes} Minutes"
+
+
+class ATCreditPrice(models.Model):
+    price = models.FloatField(null=False, blank=False)
+    minutes = models.FloatField(null=False, blank=False)
+
+    def __str__(self):
+        return f"GHS{self.price} - {self.minutes} Minutes"
+
+
+class AfaCreditTransaction(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    bundle_number = models.BigIntegerField(null=False, blank=False)
+    offer = models.CharField(max_length=250, null=False, blank=False)
+    reference = models.CharField(max_length=20, null=False, blank=True)
+    transaction_date = models.DateTimeField(auto_now_add=True)
+    choices = (
+        ("Pending", "Pending"),
+        ("Processing", "Processing"),
+        ("Completed", "Completed"),
+        ("Failed", "Failed")
+    )
+    transaction_status = models.CharField(max_length=100, choices=choices, default="Pending")
+    description = models.CharField(max_length=500, null=True, blank=True)
+
+
+class ATMinuteTransaction(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    bundle_number = models.BigIntegerField(null=False, blank=False)
+    offer = models.CharField(max_length=250, null=False, blank=False)
+    reference = models.CharField(max_length=20, null=False, blank=True)
+    transaction_date = models.DateTimeField(auto_now_add=True)
+    choices = (
+        ("Pending", "Pending"),
+        ("Processing", "Processing"),
+        ("Completed", "Completed"),
+        ("Failed", "Failed")
+    )
+    transaction_status = models.CharField(max_length=100, choices=choices, default="Pending")
+    description = models.CharField(max_length=500, null=True, blank=True)
 
 
 ####################################################################################
@@ -382,31 +429,3 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.order.tracking_number} - {self.order.user} - {self.order.full_name}"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
