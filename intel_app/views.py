@@ -1505,6 +1505,43 @@ def paystack_webhook(request):
                 paid_amount = r_data.get('amount')
                 reference = r_data.get('reference')
 
+                paid_amount = r_data.get('amount')
+                reference = r_data.get('reference')
+
+                slashed_amount = float(paid_amount) / 100
+                reference = r_data.get('reference')
+
+                rounded_real_amount = round(float(real_amount))
+                rounded_paid_amount = round(float(slashed_amount))
+
+                print(f"reeeeeeeaaaaaaaaal amount: {rounded_real_amount}")
+                print(f"paaaaaaaaaaaaaiiddd amount: {rounded_paid_amount}")
+
+                is_within_range = (rounded_real_amount - 3) <= rounded_paid_amount <= (rounded_real_amount + 3)
+
+                if not is_within_range:
+                    sms_headers = {
+                        'Authorization': 'Bearer 1334|wroIm5YnQD6hlZzd8POtLDXxl4vQodCZNorATYGX',
+                        'Content-Type': 'application/json'
+                    }
+
+                    sms_url = 'https://webapp.usmsgh.com/api/sms/send'
+                    sms_message = f"Malicious attempt on webhook. Real amount: {rounded_real_amount} | Paid amount: {rounded_paid_amount}. Referrer: {reference}"
+
+                    sms_body = {
+                        'recipient': "233242442147",
+                        'sender_id': 'GH BAY',
+                        'message': sms_message
+                    }
+                    try:
+                        response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
+                        print(response.text)
+                    except:
+                        pass
+
+                    print("not within range")
+                    return HttpResponse(200)
+
                 if channel == "ishare":
                     if user.status == "User":
                         bundle = models.IshareBundlePrice.objects.get(price=float(real_amount)).bundle_volume
