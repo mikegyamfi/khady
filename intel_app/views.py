@@ -942,7 +942,7 @@ def credit_user_from_list(request, reference):
         if crediting.status:
             return redirect('topup_list')
         user = crediting.user
-        custom_user = models.CustomUser.objects.get(username=user.username)
+        custom_user = models.CustomUser.objects.get(id=user.id)
         amount = crediting.amount
         print(user)
         print(user.phone)
