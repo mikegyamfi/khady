@@ -593,7 +593,7 @@ def admin_mtn_history(request, status):
 
             for record in queryset:
                 # Assuming 'bundle_number' and 'offer' fields exist in your model
-                recipient_value = str(record.bundle_number)  # Ensure it's a string to preserve formatting
+                recipient_value = f"0{record.bundle_number}"  # Ensure it's a string to preserve formatting
                 data_value = record.offer  # Adjust based on actual field type
                 cleaned_data_value = float(data_value.replace('MB', ''))
                 data_value_gb = round(float(cleaned_data_value) / 1000, 2)
