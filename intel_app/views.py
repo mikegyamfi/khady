@@ -470,7 +470,8 @@ def mtn_history(request):
 
 @login_required(login_url='login')
 def at_credit_history(request):
-    user_transactions = models.ATMinuteTransaction.objects.filter(user=request.user).order_by('transaction_date').reverse()
+    user_transactions = models.ATMinuteTransaction.objects.filter(user=request.user).order_by(
+        'transaction_date').reverse()
     header = "AT Minutes Transactions"
     net = "at_min"
     context = {'txns': user_transactions, "header": header, "net": net}
@@ -479,7 +480,8 @@ def at_credit_history(request):
 
 @login_required(login_url='login')
 def afa_credit_history(request):
-    user_transactions = models.AfaCreditTransaction.objects.filter(user=request.user).order_by('transaction_date').reverse()
+    user_transactions = models.AfaCreditTransaction.objects.filter(user=request.user).order_by(
+        'transaction_date').reverse()
     header = "Afa Minutes Transaction"
     net = "afa_min"
     context = {'txns': user_transactions, "header": header, "net": net}
@@ -1511,36 +1513,37 @@ def paystack_webhook(request):
                 slashed_amount = float(paid_amount) / 100
                 reference = r_data.get('reference')
 
-                rounded_real_amount = round(float(real_amount))
-                rounded_paid_amount = round(float(slashed_amount))
+                if channel != "afa":
+                    rounded_real_amount = round(float(real_amount))
+                    rounded_paid_amount = round(float(slashed_amount))
 
-                print(f"reeeeeeeaaaaaaaaal amount: {rounded_real_amount}")
-                print(f"paaaaaaaaaaaaaiiddd amount: {rounded_paid_amount}")
+                    print(f"reeeeeeeaaaaaaaaal amount: {rounded_real_amount}")
+                    print(f"paaaaaaaaaaaaaiiddd amount: {rounded_paid_amount}")
 
-                is_within_range = (rounded_real_amount - 3) <= rounded_paid_amount <= (rounded_real_amount + 3)
+                    is_within_range = (rounded_real_amount - 3) <= rounded_paid_amount <= (rounded_real_amount + 3)
 
-                if not is_within_range:
-                    sms_headers = {
-                        'Authorization': 'Bearer 1334|wroIm5YnQD6hlZzd8POtLDXxl4vQodCZNorATYGX',
-                        'Content-Type': 'application/json'
-                    }
+                    if not is_within_range:
+                        sms_headers = {
+                            'Authorization': 'Bearer 1334|wroIm5YnQD6hlZzd8POtLDXxl4vQodCZNorATYGX',
+                            'Content-Type': 'application/json'
+                        }
 
-                    sms_url = 'https://webapp.usmsgh.com/api/sms/send'
-                    sms_message = f"Malicious attempt on webhook. Real amount: {rounded_real_amount} | Paid amount: {rounded_paid_amount}. Referrer: {reference}"
+                        sms_url = 'https://webapp.usmsgh.com/api/sms/send'
+                        sms_message = f"Malicious attempt on webhook. Real amount: {rounded_real_amount} | Paid amount: {rounded_paid_amount}. Referrer: {reference}"
 
-                    sms_body = {
-                        'recipient': "233242442147",
-                        'sender_id': 'GH BAY',
-                        'message': sms_message
-                    }
-                    try:
-                        response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
-                        print(response.text)
-                    except:
-                        pass
+                        sms_body = {
+                            'recipient': "233242442147",
+                            'sender_id': 'GH BAY',
+                            'message': sms_message
+                        }
+                        try:
+                            response = requests.request('POST', url=sms_url, params=sms_body, headers=sms_headers)
+                            print(response.text)
+                        except:
+                            pass
 
-                    print("not within range")
-                    return HttpResponse(200)
+                        print("not within range")
+                        return HttpResponse(200)
 
                 if channel == "ishare":
                     if user.status == "User":
@@ -1877,31 +1880,31 @@ def voda(request):
     db_user_id = request.user.id
 
     # if request.method == "POST":
-        # payment_reference = request.POST.get("reference")
-        # amount_paid = request.POST.get("amount")
-        # new_payment = models.Payment.objects.create(
-        #     user=request.user,
-        #     reference=payment_reference,
-        #     amount=amount_paid,
-        #     transaction_date=datetime.now(),
-        #     transaction_status="Pending"
-        # )
-        # new_payment.save()
-        # phone_number = request.POST.get("phone")
-        # offer = request.POST.get("amount")
-        # bundle = models.VodaBundlePrice.objects.get(
-        #     price=float(offer)).bundle_volume if user.status == "User" else models.AgentVodaBundlePrice.objects.get(
-        #     price=float(offer)).bundle_volume
-        #
-        # print(phone_number)
-        # new_mtn_transaction = models.VodafoneTransaction.objects.create(
-        #     user=request.user,
-        #     bundle_number=phone_number,
-        #     offer=f"{bundle}MB",
-        #     reference=payment_reference,
-        # )
-        # new_mtn_transaction.save()
-        # return JsonResponse({'status': "Your transaction will be completed shortly", 'icon': 'success'})
+    # payment_reference = request.POST.get("reference")
+    # amount_paid = request.POST.get("amount")
+    # new_payment = models.Payment.objects.create(
+    #     user=request.user,
+    #     reference=payment_reference,
+    #     amount=amount_paid,
+    #     transaction_date=datetime.now(),
+    #     transaction_status="Pending"
+    # )
+    # new_payment.save()
+    # phone_number = request.POST.get("phone")
+    # offer = request.POST.get("amount")
+    # bundle = models.VodaBundlePrice.objects.get(
+    #     price=float(offer)).bundle_volume if user.status == "User" else models.AgentVodaBundlePrice.objects.get(
+    #     price=float(offer)).bundle_volume
+    #
+    # print(phone_number)
+    # new_mtn_transaction = models.VodafoneTransaction.objects.create(
+    #     user=request.user,
+    #     bundle_number=phone_number,
+    #     offer=f"{bundle}MB",
+    #     reference=payment_reference,
+    # )
+    # new_mtn_transaction.save()
+    # return JsonResponse({'status': "Your transaction will be completed shortly", 'icon': 'success'})
     user = models.CustomUser.objects.get(id=request.user.id)
     # phone_num = user.phone
     # mtn_dict = {}
@@ -1913,7 +1916,8 @@ def voda(request):
     # for offer in mtn_offer:
     #     mtn_dict[str(offer)] = offer.bundle_volume
     context = {'form': form,
-               "ref": reference, "email": user_email, "wallet": 0 if user.wallet is None else user.wallet, 'id': db_user_id}
+               "ref": reference, "email": user_email, "wallet": 0 if user.wallet is None else user.wallet,
+               'id': db_user_id}
     return render(request, "layouts/services/voda.html", context=context)
 
 
