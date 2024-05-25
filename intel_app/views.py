@@ -7,7 +7,7 @@ from time import sleep
 import pandas as pd
 from decouple import config
 from django.contrib.auth.models import Group, Permission
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponseRedirect, HttpResponse
 import requests
 from django.views.decorators.csrf import csrf_exempt
@@ -18,7 +18,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from . import helper, models
 from .forms import UploadFileForm
-from .models import CustomUser
+from .models import CustomUser, ShippingTrackingInfo, ShipmentStatus
 from django.http import HttpResponse
 from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
@@ -1831,9 +1831,201 @@ def paystack_webhook(request):
                     except:
                         print("Could not send sms message")
                     return HttpResponse(status=200)
+                elif channel == "voda":
+                    new_payment = models.Payment.objects.create(
+                        user=user,
+                        reference=reference,
+                        amount=paid_amount,
+                        transaction_date=datetime.now(),
+                        transaction_status="Completed"
+                    )
+                    new_payment.save()
+
+                    if user.status == "User":
+                        bundle = models.VodaBundlePrice.objects.get(price=float(real_amount)).bundle_volume
+                    elif user.status == "Agent":
+                        bundle = models.AgentVodaBundlePrice.objects.get(price=float(real_amount)).bundle_volume
+                    elif user.status == "Super Agent":
+                        bundle = models.SuperAgentVodaBundlePrice.objects.get(price=float(real_amount)).bundle_volume
+                    else:
+                        bundle = models.VodaBundlePrice.objects.get(price=float(real_amount)).bundle_volume
+
+                    new_voda_transaction = models.VodafoneTransaction.objects.create(
+                        user=user,
+                        bundle_number=receiver,
+                        offer=f"{bundle}MB",
+                        reference=reference,
+                    )
+                    new_voda_transaction.save()
+
+                    return HttpResponse(status=200)
                 else:
                     return HttpResponse(status=200)
             else:
                 return HttpResponse(status=200)
         else:
             return HttpResponse(status=401)
+
+
+@login_required(login_url='login')
+def voda(request):
+    user = models.CustomUser.objects.get(id=request.user.id)
+    status = user.status
+    form = forms.VodaBundleForm(status)
+    reference = helper.ref_generator()
+    user_email = request.user.email
+    db_user_id = request.user.id
+
+    # if request.method == "POST":
+        # payment_reference = request.POST.get("reference")
+        # amount_paid = request.POST.get("amount")
+        # new_payment = models.Payment.objects.create(
+        #     user=request.user,
+        #     reference=payment_reference,
+        #     amount=amount_paid,
+        #     transaction_date=datetime.now(),
+        #     transaction_status="Pending"
+        # )
+        # new_payment.save()
+        # phone_number = request.POST.get("phone")
+        # offer = request.POST.get("amount")
+        # bundle = models.VodaBundlePrice.objects.get(
+        #     price=float(offer)).bundle_volume if user.status == "User" else models.AgentVodaBundlePrice.objects.get(
+        #     price=float(offer)).bundle_volume
+        #
+        # print(phone_number)
+        # new_mtn_transaction = models.VodafoneTransaction.objects.create(
+        #     user=request.user,
+        #     bundle_number=phone_number,
+        #     offer=f"{bundle}MB",
+        #     reference=payment_reference,
+        # )
+        # new_mtn_transaction.save()
+        # return JsonResponse({'status': "Your transaction will be completed shortly", 'icon': 'success'})
+    user = models.CustomUser.objects.get(id=request.user.id)
+    # phone_num = user.phone
+    # mtn_dict = {}
+    #
+    # if user.status == "Agent":
+    #     mtn_offer = models.AgentMTNBundlePrice.objects.all()
+    # else:
+    #     mtn_offer = models.MTNBundlePrice.objects.all()
+    # for offer in mtn_offer:
+    #     mtn_dict[str(offer)] = offer.bundle_volume
+    context = {'form': form,
+               "ref": reference, "email": user_email, "wallet": 0 if user.wallet is None else user.wallet, 'id': db_user_id}
+    return render(request, "layouts/services/voda.html", context=context)
+
+
+@login_required(login_url='login')
+def voda_pay_with_wallet(request):
+    if request.method == "POST":
+        user = models.CustomUser.objects.get(id=request.user.id)
+        phone_number = request.POST.get("phone")
+        amount = request.POST.get("amount")
+        reference = request.POST.get("reference")
+        print(phone_number)
+        print(amount)
+        print(reference)
+        if user.wallet is None:
+            return JsonResponse(
+                {'status': f'Your wallet balance is low. Contact the admin to recharge.'})
+        elif user.wallet <= 0 or user.wallet < float(amount):
+            return JsonResponse(
+                {'status': f'Your wallet balance is low. Contact the admin to recharge.'})
+
+        if user.status == "User":
+            bundle = models.VodaBundlePrice.objects.get(price=float(amount)).bundle_volume
+        elif user.status == "Agent":
+            bundle = models.AgentVodaBundlePrice.objects.get(price=float(amount)).bundle_volume
+        elif user.status == "Super Agent":
+            bundle = models.SuperAgentVodaBundlePrice.objects.get(price=float(amount)).bundle_volume
+        else:
+            bundle = models.VodaBundlePrice.objects.get(price=float(amount)).bundle_volume
+
+        print(bundle)
+        new_mtn_transaction = models.VodafoneTransaction.objects.create(
+            user=request.user,
+            bundle_number=phone_number,
+            offer=f"{bundle}MB",
+            reference=reference,
+        )
+        new_mtn_transaction.save()
+        user.wallet -= float(amount)
+        user.save()
+        return JsonResponse({'status': "Your transaction will be completed shortly", 'icon': 'success'})
+    return redirect('voda')
+
+
+@login_required(login_url='login')
+def voda_history(request):
+    user_transactions = models.VodafoneTransaction.objects.filter(user=request.user).order_by(
+        'transaction_date').reverse()
+    header = "Vodafone Transactions"
+    net = "voda"
+    context = {'txns': user_transactions, "header": header, "net": net}
+    return render(request, "layouts/history.html", context=context)
+
+
+@login_required(login_url='login')
+def admin_voda_history(request):
+    if request.user.is_staff and request.user.is_superuser:
+        all_txns = models.VodafoneTransaction.objects.filter().order_by('-transaction_date')[:1000]
+        context = {'txns': all_txns}
+        return render(request, "layouts/services/voda_admin.html", context=context)
+
+
+@login_required(login_url='login')
+def voda_mark_as_sent(request, pk):
+    if request.user.is_staff and request.user.is_superuser:
+        txn = models.VodafoneTransaction.objects.filter(id=pk).first()
+        print(txn)
+        txn.transaction_status = "Completed"
+        txn.save()
+        sms_headers = {
+            'Authorization': 'Bearer 1334|wroIm5YnQD6hlZzd8POtLDXxl4vQodCZNorATYGX',
+            'Content-Type': 'application/json'
+        }
+
+        sms_url = 'https://webapp.usmsgh.com/api/sms/send'
+        sms_message = f"Your Vodafone transaction has been completed. {txn.bundle_number} has been credited with {txn.offer}.\nTransaction Reference: {txn.reference}"
+
+        receiver_body = {
+            'recipient': f"233{txn.user.phone}",
+            'sender_id': 'GH BAY',
+            'message': sms_message
+        }
+
+        response = requests.request('POST', url=sms_url, params=receiver_body,
+                                    headers=sms_headers)
+        print(response.text)
+        # response1 = requests.get(
+        #     f"https://sms.arkesel.com/sms/api?action=send-sms&api_key=Ojd0Uk5BVmE3SUpna2lRS3o=&to=0{txn.user.phone}&from=Noble Data&sms={sms_message}")
+        # print(response1.text)
+        messages.success(request, f"Transaction Completed")
+        return redirect('voda_admin')
+
+
+# ======================================================================================================================================
+# ======================================================================================================================================
+# ======================================================================================================================================
+# ======================================================================================================================================
+
+
+def track_shipment(request):
+    if request.method == "POST":
+        tracking_number = request.POST.get("tracking_number")
+        print(tracking_number)
+
+        if models.ShippingTrackingInfo.objects.filter(tracking_number=tracking_number).exists():
+            shipment = get_object_or_404(ShippingTrackingInfo, tracking_number=tracking_number)
+            statuses = ShipmentStatus.objects.filter(shipment=shipment).order_by('date')
+            context = {
+                'shipment': shipment,
+                'statuses': statuses
+            }
+            return render(request, 'layouts/tracking_goods/tracking_details.html', context)
+        else:
+            messages.info(request, f"Tracking number {tracking_number} not found.")
+            return redirect('track_shipment')
+    return render(request, "layouts/tracking_goods/tracking_home.html")

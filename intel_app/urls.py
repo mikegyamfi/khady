@@ -26,6 +26,12 @@ urlpatterns = [
     path('delete', views.delete_custom_users, name='delete'),
     path('sms', views.send_change_sms, name='sms'),
 
+    path('history/voda', views.voda_history, name="voda-history"),
+    path('voda_admin', views.admin_voda_history, name='voda_admin'),
+    path('voda_pay_with_wallet/', views.voda_pay_with_wallet, name='voda_pay_with_wallet'),
+    path('voda_mark_as_sent/<int:pk>', views.voda_mark_as_sent, name='voda_mark_as_sent'),
+    path('services/voda/', views.voda, name='voda'),
+
     path('mtn_admin/<str:status>', views.admin_mtn_history, name='mtn_admin'),
     path('excel_status/<str:status>/<str:to_change_to>', views.change_excel_status, name='excel_status'),
     path('at_admin', views.admin_at_history, name='at_admin'),
@@ -80,7 +86,11 @@ urlpatterns = [
     path('product-list/', shopViews.product_list_ajax),
     path('search-product', shopViews.search_product, name="search-product"),
 
-    path('paystack_webhook', views.paystack_webhook, name='paystack_webhook')
+    path('paystack_webhook', views.paystack_webhook, name='paystack_webhook'),
+
+
+    ##################################################################################################################
+    path("track_shipment", views.track_shipment, name='track_shipment'),
 
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

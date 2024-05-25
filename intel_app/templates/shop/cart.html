@@ -34,7 +34,11 @@
                                         </a>
                                     {% endwith %}
                                 </td>
+                                {% if item.product.preorder_item %}
+                                <td style="font-size: 14px">{{item.product.name}}<span class="text-danger">(Preorder)</span></td>
+                                {% else %}
                                 <td style="font-size: 14px">{{item.product.name}}</td>
+                                {%endif%}
                                 <td style="font-size: 14px">{{item.product.selling_price}}</td>
                                 <td>
                                     <div class="my-auto">

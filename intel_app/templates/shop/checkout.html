@@ -71,7 +71,11 @@
                             <img style="height: 30px; width: 30px" src="{{ product_image.image.url }}" alt="{{ item.product.name }}">
                         </a>
                     {% endwith %}
-                    {{item.product.name}}
+                    {% if item.product.preorder_item %}
+                                <td>{{item.product.name}}<span class="text-danger">(P)</span></td>
+                                {% else %}
+                                <td>{{item.product.name}}</td>
+                                {%endif%}
                   </td>
                   <td>{{item.product_qty}}</td>
                   <td>Ghs {{item.product.selling_price|stringformat:'d'}}</td>

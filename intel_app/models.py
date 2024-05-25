@@ -295,6 +295,55 @@ class ATMinuteTransaction(models.Model):
     description = models.CharField(max_length=500, null=True, blank=True)
 
 
+class VodaBundlePrice(models.Model):
+    price = models.FloatField(null=False, blank=False)
+    bundle_volume = models.FloatField(null=False, blank=False)
+
+    def __str__(self):
+        if self.bundle_volume >= 1000:
+            return f"GHS{self.price} - {self.bundle_volume / 1000}GB"
+        return f"GHS{self.price} - {self.bundle_volume}MB"
+
+
+class AgentVodaBundlePrice(models.Model):
+    price = models.FloatField(null=False, blank=False)
+    bundle_volume = models.FloatField(null=False, blank=False)
+
+    def __str__(self):
+        if self.bundle_volume >= 1000:
+            return f"GHS{self.price} - {self.bundle_volume / 1000}GB"
+        return f"GHS{self.price} - {self.bundle_volume}MB"
+
+
+class SuperAgentVodaBundlePrice(models.Model):
+    price = models.FloatField(null=False, blank=False)
+    bundle_volume = models.FloatField(null=False, blank=False)
+
+    def __str__(self):
+        if self.bundle_volume >= 1000:
+            return f"GHS{self.price} - {self.bundle_volume / 1000}GB"
+        return f"GHS{self.price} - {self.bundle_volume}MB"
+
+
+class VodafoneTransaction(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    bundle_number = models.BigIntegerField(null=False, blank=False)
+    offer = models.CharField(max_length=250, null=False, blank=False)
+    reference = models.CharField(max_length=20, null=False, blank=True)
+    transaction_date = models.DateTimeField(auto_now_add=True)
+    choices = (
+        ("Pending", "Pending"),
+        ("Completed", "Completed"),
+        ("Processing", "Processing"),
+        ("Failed", "Failed")
+    )
+    transaction_status = models.CharField(max_length=100, choices=choices, default="Pending")
+    description = models.CharField(max_length=500, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.bundle_number} - {self.reference}"
+
+
 ####################################################################################
 
 def get_file_path(filename):
@@ -352,6 +401,9 @@ class Product(models.Model):
     meta_keywords = models.CharField(max_length=150, blank=True)
     meta_description = models.CharField(max_length=150, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    preorder_item = models.BooleanField(default=False)
+    preorder_end_date = models.DateField(null=True, blank=True)
+    preorder_arrival_date = models.DateField(null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -429,3 +481,41 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.order.tracking_number} - {self.order.user} - {self.order.full_name}"
+
+
+# ======================================================================================================================================
+# ======================================================================================================================================
+# ======================================================================================================================================
+# ======================================================================================================================================
+
+class StatusName(models.Model):
+    name = models.CharField(max_length=150, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
+class ShippingTrackingInfo(models.Model):
+    full_name = models.CharField(max_length=150, null=True, blank=True)
+    phone_number = models.CharField(max_length=150, null=True, blank=True)
+    email = models.EmailField(null=True, blank=True)
+    tracking_number = models.CharField(max_length=150, null=True, blank=True)
+    goods = models.TextField(null=True, blank=True)
+    shipping_fee = models.FloatField(null=True, blank=True)
+    goods_amount = models.FloatField(null=True, blank=True)
+    recent_change_date = models.DateTimeField(auto_now_add=True)
+    pickup_location = models.CharField(max_length=150, null=True, blank=True)
+    shipment_status = models.ForeignKey(StatusName, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def __str__(self):
+        return self.tracking_number
+
+
+class ShipmentStatus(models.Model):
+    shipment = models.ForeignKey(ShippingTrackingInfo, related_name='statuses', on_delete=models.CASCADE)
+    status = models.ForeignKey(StatusName, on_delete=models.CASCADE)
+    date = models.DateTimeField()
+    location = models.CharField(max_length=255, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.status.name} - {self.date}"

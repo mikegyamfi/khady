@@ -19,6 +19,14 @@
                     {% if product.tag %}
                         <label class="badge bg-warning mb-3">{{product.tag}}</label>
                     {% endif %}
+                      {% if product.preorder_item %}
+                      <i class="text-danger">This item is a preorder item. End Date for preorder is: </i>
+                        <label class="badge bg-warning mb-3">{{product.preorder_end_date}}</label> <br>
+
+                      <i class="text-danger">Estimated Arrival Date after Preorder End Date:</i>
+                        <label class="badge bg-warning mb-3"> {{product.preorder_arrival_date}}
+                        </label>
+                    {% endif %}
                     <h2 class="mb-0">
                         {{product.name}}
                         {% comment %} {% if product.trending %}

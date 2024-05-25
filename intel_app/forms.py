@@ -146,5 +146,20 @@ class OrderDetailsForm(forms.ModelForm):
         fields = ('full_name', 'email', 'phone', 'address', 'city', 'message', 'region')
 
 
+class VodaBundleForm(forms.Form):
+    phone_number = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'form-control phone', 'placeholder': '0200000000'}))
+    offers = forms.ModelChoiceField(queryset=models.VodaBundlePrice.objects.all().order_by('price'), to_field_name='price', empty_label=None,
+                                    widget=forms.Select(attrs={'class': 'form-control airtime-input'}))
+
+    def __init__(self, status, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if status == "User":
+            self.fields['offers'].queryset = models.VodaBundlePrice.objects.all()
+        elif status == "Agent":
+            self.fields['offers'].queryset = models.AgentVodaBundlePrice.objects.all()
+        elif status == "Super Agent":
+            self.fields['offers'].queryset = models.SuperAgentVodaBundlePrice.objects.all()
+
+
 
 
