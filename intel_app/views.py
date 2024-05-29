@@ -562,6 +562,10 @@ def change_excel_status(request, status, to_change_to):
     return redirect("mtn_admin", status=status)
 
 
+from django.db.models import FloatField
+from django.db.models.functions import Cast, Substr, Length
+
+
 @login_required(login_url='login')
 def admin_mtn_history(request, status):
     if request.user.is_staff and request.user.is_superuser:
@@ -588,7 +592,9 @@ def admin_mtn_history(request, status):
             data_col_index = 2  # Example index for "DATA"
 
             # Query your Django model
-            queryset = models.MTNTransaction.objects.filter(transaction_status="Pending")
+            queryset = models.MTNTransaction.objects.filter(transaction_status="Pending").annotate(
+                offer_value=Cast(Substr('offer', 1, Length('offer') - 2), FloatField())
+            ).order_by('-offer_value')
 
             # Determine the starting row for updates, preserving headers and any other pre-existing content
             start_row = 2  # Assuming data starts from row 2
