@@ -2067,7 +2067,7 @@ def generate_tracking_number():
 def create_order(request):
     if request.method == 'POST':
         order_form = OrderForm(request.POST)
-        package_forms = [PackageForm(request.POST, prefix=str(i)) for i in range(15)]
+        package_forms = [PackageForm(request.POST, prefix=str(i)) for i in range(50)]
 
         if order_form.is_valid():
             order = order_form.save()
