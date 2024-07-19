@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<header>
+  <div class="container mt-5">
+    <div class="page-banner">
+      <div class="row justify-content-center align-items-center h-100">
+        <div class="col-md-6">
+          <nav aria-label="Breadcrumb">
+            <ul class="breadcrumb justify-content-center py-0 bg-transparent">
+              <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+              <li class="breadcrumb-item active">Track Order</li>
+            </ul>
+          </nav>
+          <h4 class="text-center">Shipment Details</h4>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="page-section" id="services">
+    <div class="container">
+        <div class="text-center">
+            <h4 class="title-section">Shipping Details ({{ tracking_number }})</h4>
+            <div class="divider mx-auto"></div>
+        </div>
+
+        {% if order %}
+            <h1>Order {{ order.order_number }}</h1>
+            <p><strong>Owner Name:</strong> {{ order.owner_name }}</p>
+            <p><strong>Estimated Arrival Date:</strong> {{ order.estimated_date_of_arrival }}</p>
+            <p><strong>Loaded Date:</strong> {{ order.loaded_date }}</p>
+            <p><strong>Received Date:</strong> {{ order.received_date }}</p>
+            <p><strong>Status:</strong> {{ order.status }}</p>
+
+            <hr>
+
+            <h3>Packages</h3>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>CBM</th>
+                        <th>Package Tracking Number</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for package in packages %}
+                        <tr>
+                            <td>{{ package.item_name }}</td>
+                            <td>{{ package.quantity }}</td>
+                            <td>GHS{{ package.price }}</td>
+                            <td>{{ package.cbm }}</td>
+                            <td>{{ package.package_tracking_number }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <h4>Total: GHS{{ total }}</h4>
+        {% else %}
+            <p class="alert alert-danger">Tracking number not found.</p>
+        {% endif %}
+    </div>
+  </div> <!-- .page-section -->
+</main>
+
+{% endblock %}
+
+{% block scripts %}
+<!-- Add custom scripts here if needed -->
+{% endblock scripts %}

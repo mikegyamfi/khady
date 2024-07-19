@@ -488,34 +488,25 @@ class OrderItem(models.Model):
 # ======================================================================================================================================
 # ======================================================================================================================================
 
-class StatusName(models.Model):
-    name = models.CharField(max_length=150, unique=True)
-
-    def __str__(self):
-        return self.name
-
-
-class ShippingTrackingInfo(models.Model):
-    full_name = models.CharField(max_length=150, null=True, blank=True)
-    phone_number = models.CharField(max_length=150, null=True, blank=True)
-    email = models.EmailField(null=True, blank=True)
-    tracking_number = models.CharField(max_length=150, null=True, blank=True)
-    goods = models.TextField(null=True, blank=True)
-    shipping_fee = models.FloatField(null=True, blank=True)
-    goods_amount = models.FloatField(null=True, blank=True)
-    recent_change_date = models.DateTimeField(auto_now_add=True)
-    pickup_location = models.CharField(max_length=150, null=True, blank=True)
-    shipment_status = models.ForeignKey(StatusName, on_delete=models.SET_NULL, null=True, blank=True)
-
-    def __str__(self):
-        return self.tracking_number
+class ShippingOrder(models.Model):
+    owner_name = models.CharField(max_length=250, null=False, blank=False)
+    order_number = models.CharField(max_length=20, unique=True)
+    loaded_date = models.DateTimeField()
+    received_date = models.DateTimeField()
+    estimated_date_of_arrival = models.DateTimeField()
+    status = models.CharField(max_length=50, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
-class ShipmentStatus(models.Model):
-    shipment = models.ForeignKey(ShippingTrackingInfo, related_name='statuses', on_delete=models.CASCADE)
-    status = models.ForeignKey(StatusName, on_delete=models.CASCADE)
-    date = models.DateTimeField()
-    location = models.CharField(max_length=255, null=True, blank=True)
+class Package(models.Model):
+    order = models.ForeignKey(ShippingOrder, related_name='packages', on_delete=models.CASCADE)
+    item_name = models.CharField(max_length=255, null=True, blank=True)
+    quantity = models.IntegerField(null=True, blank=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2,  null=True, blank=True)
+    cbm = models.DecimalField(max_digits=10, decimal_places=2,  null=True, blank=True)
+    package_tracking_number = models.CharField(max_length=150, null=True, blank=True)
 
-    def __str__(self):
-        return f"{self.status.name} - {self.date}"
+
+class Tracking(models.Model):
+    tracking_number = models.CharField(max_length=20, unique=True)
+    order = models.OneToOneField(ShippingOrder, on_delete=models.CASCADE)

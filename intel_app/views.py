@@ -17,13 +17,12 @@ from . import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from . import helper, models
-from .forms import UploadFileForm
-from .models import CustomUser, ShippingTrackingInfo, ShipmentStatus
+from .forms import UploadFileForm, OrderForm, PackageForm, TrackingForm
 from django.http import HttpResponse
 from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 from io import BytesIO
-from .models import MTNTransaction  # Adjust the import based on your model's location
+from .models import MTNTransaction, Tracking  # Adjust the import based on your model's location
 
 from openpyxl import load_workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
@@ -2027,15 +2026,71 @@ def track_shipment(request):
         tracking_number = request.POST.get("tracking_number")
         print(tracking_number)
 
-        if models.ShippingTrackingInfo.objects.filter(tracking_number=tracking_number).exists():
-            shipment = get_object_or_404(ShippingTrackingInfo, tracking_number=tracking_number)
-            statuses = ShipmentStatus.objects.filter(shipment=shipment).order_by('date')
-            context = {
-                'shipment': shipment,
-                'statuses': statuses
-            }
-            return render(request, 'layouts/tracking_goods/tracking_details.html', context)
-        else:
-            messages.info(request, f"Tracking number {tracking_number} not found.")
-            return redirect('track_shipment')
+        return redirect('track_order', tracking_number=tracking_number)
     return render(request, "layouts/tracking_goods/tracking_home.html")
+
+
+from django.shortcuts import render
+from .models import Tracking, ShippingOrder, Package
+
+
+def track_order(request, tracking_number):
+    try:
+        tracking = Tracking.objects.get(tracking_number=tracking_number)
+        order = tracking.order
+        packages = order.packages.all()
+        total = sum(package.price * package.quantity for package in packages)
+    except Tracking.DoesNotExist:
+        order, packages, total = None, None, 0
+
+    return render(request, 'layouts/track_order.html', {
+        'order': order,
+        'packages': packages,
+        'total': total,
+        'tracking_number': tracking_number
+    })
+
+
+import random
+import string
+
+
+def generate_tracking_number():
+    letters = string.ascii_uppercase
+    digits = string.digits
+    part1 = ''.join(random.choices(letters, k=3))
+    part2 = ''.join(random.choices(digits, k=4))
+    part3 = ''.join(random.choices(letters, k=2))
+    return f"{part1}-{part2}-{part3}"
+
+
+def create_order(request):
+    if request.method == 'POST':
+        order_form = OrderForm(request.POST)
+        package_forms = [PackageForm(request.POST, prefix=str(i)) for i in range(15)]
+
+        if order_form.is_valid():
+            order = order_form.save()
+            for package_form in package_forms:
+                if package_form.is_valid() and any(package_form.cleaned_data.values()):
+                    package = package_form.save(commit=False)
+                    package.order = order
+                    package.save()
+                else:
+                    print("package forms")
+                    print(package_form.errors)
+            Tracking.objects.create(
+                order=order,
+                tracking_number=generate_tracking_number()
+            )
+            return redirect('order_success')
+        else:
+            print(order_form.errors)
+    else:
+        order_form = OrderForm()
+        package_forms = [PackageForm(prefix=str(i)) for i in range(15)]
+
+    return render(request, 'layouts/create_order.html', {
+        'order_form': order_form,
+        'package_forms': package_forms,
+    })

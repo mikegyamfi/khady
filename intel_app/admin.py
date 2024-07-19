@@ -64,29 +64,6 @@ class VodafoneTransactionAdmin(admin.ModelAdmin):
     search_fields = ['reference', 'bundle_number']
 
 
-class ShipmentStatusAdmin(admin.ModelAdmin):
-    list_display = ('shipment', 'status', 'date', 'location')
-    list_filter = ('status', 'date')
-    search_fields = ('shipment__tracking_number', 'status__name', 'location')
-
-
-class StatusNameAdmin(admin.ModelAdmin):
-    list_display = ('name',)
-    search_fields = ('name',)
-
-
-class ShipmentStatusInline(admin.TabularInline):
-    model = models.ShipmentStatus
-    extra = 1
-
-
-class ShippingTrackingInfoAdmin(admin.ModelAdmin):
-    list_display = ('tracking_number', 'full_name', 'phone_number', 'email', 'shipment_status', 'recent_change_date')
-    list_filter = ('shipment_status', 'recent_change_date')
-    search_fields = ('tracking_number', 'full_name', 'phone_number', 'email')
-    inlines = [ShipmentStatusInline]
-
-
 admin.site.register(models.CustomUser, CustomUserAdmin)
 admin.site.register(models.IShareBundleTransaction, IShareBundleTransactionAdmin)
 admin.site.register(models.MTNTransaction, MTNTransactionAdmin)
@@ -114,9 +91,6 @@ admin.site.register(models.AgentVodaBundlePrice)
 admin.site.register(models.SuperAgentVodaBundlePrice)
 admin.site.register(models.VodaBundlePrice)
 admin.site.register(models.VodafoneTransaction, VodafoneTransactionAdmin)
-admin.site.register(models.ShippingTrackingInfo, ShippingTrackingInfoAdmin)
-admin.site.register(models.ShipmentStatus, ShipmentStatusAdmin)
-admin.site.register(models.StatusName, StatusNameAdmin)
 #########################################################################
 admin.site.register(models.Category)
 admin.site.register(models.Product, ProductAdmin)
@@ -126,3 +100,7 @@ admin.site.register(models.Order)
 admin.site.register(models.Brand)
 admin.site.register(models.ProductImage)
 admin.site.register(models.GeneralCategory)
+#########################################################################
+admin.site.register(models.ShippingOrder)
+admin.site.register(models.Package)
+admin.site.register(models.Tracking)

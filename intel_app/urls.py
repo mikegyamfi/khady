@@ -90,7 +90,10 @@ urlpatterns = [
 
 
     ##################################################################################################################
-    path("track_shipment", views.track_shipment, name='track_shipment'),
+    path("track_shipment_page", views.track_shipment, name='track_shipment'),
+    path("track_shipment/<str:tracking_number>", views.track_order, name='track_order'),
+    path("create_order", views.create_order, name='create_order')
+
 
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

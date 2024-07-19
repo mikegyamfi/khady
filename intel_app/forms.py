@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import CustomUser
+from .models import CustomUser, Order, Package, Tracking, ShippingOrder
 from . import models
 
 
@@ -19,8 +19,10 @@ class CustomUserForm(UserCreationForm):
 
 
 class IShareBundleForm(forms.Form):
-    phone_number = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'form-control phone', 'placeholder': '0270000000'}))
-    offers = forms.ModelChoiceField(queryset=models.IshareBundlePrice.objects.all().order_by('price'), to_field_name='price', empty_label=None,
+    phone_number = forms.IntegerField(
+        widget=forms.NumberInput(attrs={'class': 'form-control phone', 'placeholder': '0270000000'}))
+    offers = forms.ModelChoiceField(queryset=models.IshareBundlePrice.objects.all().order_by('price'),
+                                    to_field_name='price', empty_label=None,
                                     widget=forms.Select(attrs={'class': 'form-control airtime-input'}))
 
     def __init__(self, status, *args, **kwargs):
@@ -35,9 +37,11 @@ class IShareBundleForm(forms.Form):
 
 
 class MTNForm(forms.Form):
-    phone_number = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'form-control mtn-phone', 'placeholder': '0200000000'}))
-    offers = forms.ModelChoiceField(queryset=models.MTNBundlePrice.objects.all().order_by('price'), to_field_name='price', empty_label=None,
-                               widget=forms.Select(attrs={'class': 'form-control mtn-offer'}))
+    phone_number = forms.IntegerField(
+        widget=forms.NumberInput(attrs={'class': 'form-control mtn-phone', 'placeholder': '0200000000'}))
+    offers = forms.ModelChoiceField(queryset=models.MTNBundlePrice.objects.all().order_by('price'),
+                                    to_field_name='price', empty_label=None,
+                                    widget=forms.Select(attrs={'class': 'form-control mtn-offer'}))
 
     def __init__(self, status, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -51,7 +55,8 @@ class MTNForm(forms.Form):
 
 
 class CreditUserForm(forms.Form):
-    user = forms.ModelChoiceField(queryset=models.CustomUser.objects.all().order_by('username'), to_field_name='username', empty_label=None,
+    user = forms.ModelChoiceField(queryset=models.CustomUser.objects.all().order_by('username'),
+                                  to_field_name='username', empty_label=None,
                                   widget=forms.Select(attrs={'class': 'form-control airtime-input'}))
     amount = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'GHS 100'}))
 
@@ -85,8 +90,10 @@ class UploadFileForm(forms.Form):
 
 
 class BigTimeBundleForm(forms.Form):
-    phone_number = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'form-control phone', 'placeholder': '0270000000'}))
-    offers = forms.ModelChoiceField(queryset=models.BigTimeBundlePrice.objects.all().order_by('price'), to_field_name='price', empty_label=None,
+    phone_number = forms.IntegerField(
+        widget=forms.NumberInput(attrs={'class': 'form-control phone', 'placeholder': '0270000000'}))
+    offers = forms.ModelChoiceField(queryset=models.BigTimeBundlePrice.objects.all().order_by('price'),
+                                    to_field_name='price', empty_label=None,
                                     widget=forms.Select(attrs={'class': 'form-control airtime-input'}))
 
     def __init__(self, status, *args, **kwargs):
@@ -104,7 +111,8 @@ class AFARegistrationForm(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control name'}))
     phone_number = forms.IntegerField(
         widget=forms.NumberInput(attrs={'class': 'form-control phone', 'placeholder': '0240000000'}))
-    gh_card_number = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control card', 'placeholder': 'GHA-XXXXXXXXXXX-X'}))
+    gh_card_number = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control card', 'placeholder': 'GHA-XXXXXXXXXXX-X'}))
     occupation = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control occ'}))
     date_of_birth = forms.CharField(
         widget=forms.DateInput(attrs={'class': 'form-control birth', 'type': 'date'}))
@@ -139,7 +147,8 @@ class OrderDetailsForm(forms.ModelForm):
 
     region = forms.CharField(widget=forms.Select(attrs={'class': 'form-control region'}, choices=REGIONS_CHOICES))
     message = forms.CharField(required=False, widget=forms.Textarea(
-        attrs={'class': 'form-control message', 'placeholder': 'Message for Vendor', 'id': 'plain', 'cols': 20, 'rows': 4}))
+        attrs={'class': 'form-control message', 'placeholder': 'Message for Vendor', 'id': 'plain', 'cols': 20,
+               'rows': 4}))
 
     class Meta:
         model = models.Order
@@ -147,8 +156,10 @@ class OrderDetailsForm(forms.ModelForm):
 
 
 class VodaBundleForm(forms.Form):
-    phone_number = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'form-control phone', 'placeholder': '0200000000'}))
-    offers = forms.ModelChoiceField(queryset=models.VodaBundlePrice.objects.all().order_by('price'), to_field_name='price', empty_label=None,
+    phone_number = forms.IntegerField(
+        widget=forms.NumberInput(attrs={'class': 'form-control phone', 'placeholder': '0200000000'}))
+    offers = forms.ModelChoiceField(queryset=models.VodaBundlePrice.objects.all().order_by('price'),
+                                    to_field_name='price', empty_label=None,
                                     widget=forms.Select(attrs={'class': 'form-control airtime-input'}))
 
     def __init__(self, status, *args, **kwargs):
@@ -161,5 +172,39 @@ class VodaBundleForm(forms.Form):
             self.fields['offers'].queryset = models.SuperAgentVodaBundlePrice.objects.all()
 
 
+class BootstrapMixin(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            field.widget.attrs['class'] = 'form-control'
+            field.required = False  # Make fields optional in backend validation
+            field.widget.attrs.pop('required', None)
 
 
+class OrderForm(BootstrapMixin):
+    class Meta:
+        model = ShippingOrder
+        fields = ['owner_name', 'order_number', 'loaded_date', 'received_date', 'estimated_date_of_arrival', 'status']
+
+        widgets = {
+            'loaded_date': forms.DateInput(attrs={'type': 'date'}),
+            'received_date': forms.DateInput(attrs={'type': 'date'}),
+            'estimated_date_of_arrival': forms.DateInput(attrs={'type': 'date'}),
+        }
+
+
+class PackageForm(BootstrapMixin):
+    class Meta:
+        model = Package
+        fields = ['item_name', 'quantity', 'price', 'cbm', 'package_tracking_number']
+
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            for field in self.fields.values():
+                field.required = False
+
+
+class TrackingForm(BootstrapMixin):
+    class Meta:
+        model = Tracking
+        fields = ['tracking_number', 'order']
