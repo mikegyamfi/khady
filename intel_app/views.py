@@ -2088,7 +2088,7 @@ def create_order(request):
             print(order_form.errors)
     else:
         order_form = OrderForm()
-        package_forms = [PackageForm(prefix=str(i)) for i in range(15)]
+        package_forms = [PackageForm(prefix=str(i)) for i in range(50)]
 
     return render(request, 'layouts/create_order.html', {
         'order_form': order_form,
