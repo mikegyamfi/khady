@@ -2079,11 +2079,13 @@ def create_order(request):
                 else:
                     print("package forms")
                     print(package_form.errors)
-            Tracking.objects.create(
+            tracking = Tracking.objects.create(
                 order=order,
                 tracking_number=generate_tracking_number()
             )
-            return redirect('order_success')
+            tracking.save()
+            messages.success(request, f"Order Created. Tracking number is {tracking.tracking_number}")
+            return redirect('create_order')
         else:
             print(order_form.errors)
     else:
