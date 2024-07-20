@@ -3,6 +3,8 @@ from django.contrib.auth.admin import UserAdmin
 from . import models
 from import_export.admin import ExportActionMixin
 
+from .models import Package
+
 
 # Register your models here.
 class CustomUserAdmin(ExportActionMixin, UserAdmin):
@@ -64,6 +66,18 @@ class VodafoneTransactionAdmin(admin.ModelAdmin):
     search_fields = ['reference', 'bundle_number']
 
 
+class PackageInline(admin.TabularInline):
+    model = Package
+
+
+class OrderAdmin(admin.ModelAdmin):
+    inlines = [PackageInline]
+
+
+class TrackingAdmin(admin.ModelAdmin):
+    list_display = ['tracking_number', 'order']
+
+
 admin.site.register(models.CustomUser, CustomUserAdmin)
 admin.site.register(models.IShareBundleTransaction, IShareBundleTransactionAdmin)
 admin.site.register(models.MTNTransaction, MTNTransactionAdmin)
@@ -101,6 +115,6 @@ admin.site.register(models.Brand)
 admin.site.register(models.ProductImage)
 admin.site.register(models.GeneralCategory)
 #########################################################################
-admin.site.register(models.ShippingOrder)
+admin.site.register(models.ShippingOrder, OrderAdmin)
 admin.site.register(models.Package)
-admin.site.register(models.Tracking)
+admin.site.register(models.Tracking, TrackingAdmin)
