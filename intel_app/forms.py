@@ -184,7 +184,7 @@ class BootstrapMixin(forms.ModelForm):
 class OrderForm(BootstrapMixin):
     class Meta:
         model = ShippingOrder
-        fields = ['owner_name', 'order_number', 'loaded_date', 'received_date', 'estimated_date_of_arrival', 'status']
+        fields = ['owner_name', 'phone_number', 'order_number', 'loaded_date', 'received_date', 'estimated_date_of_arrival', 'status']
 
         widgets = {
             'loaded_date': forms.DateInput(attrs={'type': 'date'}),
@@ -208,3 +208,10 @@ class TrackingForm(BootstrapMixin):
     class Meta:
         model = Tracking
         fields = ['tracking_number', 'order']
+
+
+class StatusUpdateForm(forms.ModelForm):
+    class Meta:
+        model = ShippingOrder
+        fields = ['status']
+

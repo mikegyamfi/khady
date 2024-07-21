@@ -10,6 +10,7 @@ from django.contrib.auth.models import Group, Permission
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponseRedirect, HttpResponse
 import requests
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from tablib import Dataset
 
@@ -17,7 +18,7 @@ from . import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from . import helper, models
-from .forms import UploadFileForm, OrderForm, PackageForm, TrackingForm
+from .forms import UploadFileForm, OrderForm, PackageForm, TrackingForm, StatusUpdateForm
 from django.http import HttpResponse
 from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
@@ -2039,7 +2040,7 @@ def track_order(request, tracking_number):
         tracking = Tracking.objects.get(tracking_number=tracking_number)
         order = tracking.order
         packages = order.packages.all()
-        total = sum(package.price * package.quantity for package in packages)
+        total = sum(package.price for package in packages)
     except Tracking.DoesNotExist:
         order, packages, total = None, None, 0
 
@@ -2085,6 +2086,24 @@ def create_order(request):
             )
             tracking.save()
             messages.success(request, f"Order Created. Tracking number is {tracking.tracking_number}")
+
+            sms_url = 'https://webapp.usmsgh.com/api/sms/send'
+            sms_message = f"Hello, {order.owner_name}Your shipping order has been placed. Track your shipment with the link below.\nhttps://www.ghbays.com/trackshipment/{tracking.tracking_number}"
+
+            receiver_body = {
+                'recipient': f"233{order.phone_number[1:]}",
+                'sender_id': 'GH BAY',
+                'message': sms_message
+            }
+
+            sms_headers = {
+                'Authorization': 'Bearer 1334|wroIm5YnQD6hlZzd8POtLDXxl4vQodCZNorATYGX',
+                'Content-Type': 'application/json'
+            }
+
+            response = requests.request('POST', url=sms_url, params=receiver_body,
+                                        headers=sms_headers)
+            print(response.text)
             return redirect('create_order')
         else:
             print(order_form.errors)
@@ -2096,3 +2115,44 @@ def create_order(request):
         'order_form': order_form,
         'package_forms': package_forms,
     })
+
+
+def admin_order_list(request):
+    if request.method == 'POST':
+        order_id = request.POST.get('order_id')
+        status = request.POST.get('status')
+        order = ShippingOrder.objects.get(id=order_id)
+        tracking = models.Tracking.objects.get(order=order)
+
+        if status == 'Loaded':
+            order.loaded_date = timezone.now()
+        elif status == 'Received':
+            order.received_date = timezone.now()
+        elif status == 'Out for Delivery':
+            order.estimated_date_of_arrival = timezone.now()
+
+        order.status = status
+        order.save()
+
+        sms_url = 'https://webapp.usmsgh.com/api/sms/send'
+        sms_message = f"Hello, {order.owner_name}. Your shipping order status has changed. Track your shipment with the link below.\nhhttps://www.ghbays.com/trackshipment/{tracking.tracking_number}"
+
+        receiver_body = {
+            'recipient': f"233{order.phone_number[1:]}",
+            'sender_id': 'GH BAY',
+            'message': sms_message
+        }
+
+        sms_headers = {
+            'Authorization': 'Bearer 1334|wroIm5YnQD6hlZzd8POtLDXxl4vQodCZNorATYGX',
+            'Content-Type': 'application/json'
+        }
+
+        response = requests.request('POST', url=sms_url, params=receiver_body,
+                                    headers=sms_headers)
+        print(response.text)
+        # send_sms_notification(order.phone_number, order.status)
+        return redirect('admin_order_list')
+
+    orders = ShippingOrder.objects.all()
+    return render(request, 'layouts/admin_orders.html', {'orders': orders})

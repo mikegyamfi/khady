@@ -490,12 +490,14 @@ class OrderItem(models.Model):
 
 class ShippingOrder(models.Model):
     owner_name = models.CharField(max_length=250, null=False, blank=False)
-    order_number = models.CharField(max_length=20, unique=True)
+    phone_number = models.CharField(max_length=150, null=True, blank=True)
+    order_number = models.CharField(max_length=20)
     loaded_date = models.DateTimeField()
     received_date = models.DateTimeField()
     estimated_date_of_arrival = models.DateTimeField()
     status = models.CharField(max_length=50, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    recent_update_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.owner_name} - {self.order_number}"
