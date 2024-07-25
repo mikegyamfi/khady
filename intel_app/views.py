@@ -2037,8 +2037,7 @@ from .models import Tracking, ShippingOrder, Package
 
 def track_order(request, tracking_number):
     try:
-        tracking = Tracking.objects.get(tracking_number=tracking_number)
-        order = tracking.order
+        order = models.ShippingOrder.objects.get(order_number=tracking_number)
         packages = order.packages.all()
         total = sum(package.price for package in packages)
     except Tracking.DoesNotExist:
@@ -2085,10 +2084,10 @@ def create_order(request):
                 tracking_number=generate_tracking_number()
             )
             tracking.save()
-            messages.success(request, f"Order Created. Tracking number is {tracking.tracking_number}")
+            messages.success(request, f"Order Created. Tracking number is {order.order_number}")
 
             sms_url = 'https://webapp.usmsgh.com/api/sms/send'
-            sms_message = f"Hello, {order.owner_name}Your shipping order has been placed. Track your shipment with the link below.\nhttps://www.ghbays.com/trackshipment/{tracking.tracking_number}"
+            sms_message = f"Hello, {order.owner_name}, Your goods have been received in our China warehouse. Track your shipment with the link below.\nhttps://www.ghbays.com/trackshipment/{order.order_number}"
 
             receiver_body = {
                 'recipient': f"233{order.phone_number[1:]}",
