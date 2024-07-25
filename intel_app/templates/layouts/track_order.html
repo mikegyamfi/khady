@@ -38,6 +38,7 @@
             <hr>
 
             <h3>Packages</h3>
+            <div class="table-responsive">
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -60,7 +61,7 @@
                     {% endfor %}
                 </tbody>
             </table>
-
+</div>
             <h4>Shipping Total: GHS{{ total }}</h4>
         {% else %}
             <p class="alert alert-danger">Tracking number not found.</p>
