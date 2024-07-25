@@ -2156,3 +2156,31 @@ def admin_order_list(request):
 
     orders = ShippingOrder.objects.all()
     return render(request, 'layouts/admin_orders.html', {'orders': orders})
+
+
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from .models import CustomUser
+
+import string
+import random
+
+
+def generate_unique_shipping_code(length=8):
+    characters = string.ascii_letters + string.digits
+    return ''.join(random.choice(characters) for _ in range(length))
+
+
+@login_required
+def generate_shipping_code(request):
+    user = request.user
+    unique_code = generate_unique_shipping_code()
+
+    # Ensure the code is unique
+    while CustomUser.objects.filter(unique_shipping_code=unique_code).exists():
+        unique_code = generate_unique_shipping_code()
+
+    user.unique_shipping_code = unique_code
+    user.save()
+    messages.success(request, f"Your unique shipping code is {user.unique_shipping_code}. You can also find your code at the bottom or end of the page.")
+    return redirect('home')

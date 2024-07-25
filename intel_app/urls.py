@@ -87,6 +87,7 @@ urlpatterns = [
     path('search-product', shopViews.search_product, name="search-product"),
 
     path('paystack_webhook', views.paystack_webhook, name='paystack_webhook'),
+    path('generate_shipping_code', views.generate_shipping_code, name='generate_shipping_code'),
 
 
     ##################################################################################################################

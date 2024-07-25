@@ -22,11 +22,17 @@
           </ul>
         </div>
         <div class="col-lg-3 py-3">
-          <h5>Subscribe</h5>
-          <form action="#">
-            <input type="text" class="form-control" placeholder="Enter your mail..">
+            {% if request.user.is_authenticated %}
+          <h5>Generate Code for Shipping with us</h5>
+          <form class="mb-3" action="#">
+          {% if request.user.unique_shipping_code %}
+              <a disabled="" class="btn btn-outline-primary disabled" href="#">Generate</a>
+              {% else %}
+              <a class="btn btn-outline-primary" href="{% url 'generate_shipping_code' %}">Generate</a>
+              {% endif %}
           </form>
-
+           <p>Unique shipping code: {{ request.user.unique_shipping_code }}</p>
+            {% endif %}
           <div class="sosmed-button mt-4">
             <a href="#"><span class="mai-logo-facebook-f"></span></a>
             <a href="#"><span class="mai-logo-twitter"></span></a>

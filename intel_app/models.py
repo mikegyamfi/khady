@@ -26,6 +26,7 @@ class CustomUser(AbstractUser):
     status = models.CharField(max_length=250, null=False, blank=False, choices=choices, default="User")
     password1 = models.CharField(max_length=100, null=False, blank=False)
     password2 = models.CharField(max_length=100, null=False, blank=False)
+    unique_shipping_code = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
         return self.username
