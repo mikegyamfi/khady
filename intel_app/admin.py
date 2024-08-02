@@ -9,7 +9,7 @@ from .models import Package
 # Register your models here.
 class CustomUserAdmin(ExportActionMixin, UserAdmin):
     list_display = ['first_name', 'last_name', 'username', 'email', 'wallet', 'phone', 'status']
-    search_fields = ['unique_shipping_code']
+    search_fields = ['unique_shipping_code', 'username']
 
     fieldsets = (
         *UserAdmin.fieldsets,
