@@ -2040,8 +2040,9 @@ def track_order(request, tracking_number):
         order = models.ShippingOrder.objects.get(order_number=tracking_number)
         packages = order.packages.all()
         total = sum(package.price for package in packages)
-    except Tracking.DoesNotExist:
-        order, packages, total = None, None, 0
+    except models.ShippingOrder.DoesNotExist:
+        messages.info(request, "No shipping order found")
+        return redirect('track_shipment')
 
     return render(request, 'layouts/track_order.html', {
         'order': order,
