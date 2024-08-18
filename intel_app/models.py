@@ -345,6 +345,14 @@ class VodafoneTransaction(models.Model):
         return f"{self.user.username} - {self.bundle_number} - {self.reference}"
 
 
+class Announcement(models.Model):
+    message = models.CharField(max_length=500, null=True, blank=True)
+    active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.message
+
+
 ####################################################################################
 
 def get_file_path(filename):

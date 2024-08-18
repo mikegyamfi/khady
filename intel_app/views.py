@@ -33,6 +33,13 @@ from openpyxl import load_workbook
 
 # Create your views here.
 def home(request):
+    if models.Announcement.objects.filter(active=True).exists():
+        announcement = models.Announcement.objects.filter(active=True).first()
+        messages.info(request, announcement.message)
+        context = {
+            "announcement": announcement.message if announcement else None,
+        }
+        return render(request, "layouts/index.html", context=context)
     return render(request, "layouts/index.html")
 
 

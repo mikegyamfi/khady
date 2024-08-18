@@ -101,6 +101,7 @@ admin.site.register(models.ATMinuteTransaction)
 admin.site.register(models.ATCreditPrice)
 admin.site.register(models.AfaCreditTransaction)
 admin.site.register(models.AfaCreditPrice)
+admin.site.register(models.Announcement)
 
 admin.site.register(models.AgentVodaBundlePrice)
 admin.site.register(models.SuperAgentVodaBundlePrice)
