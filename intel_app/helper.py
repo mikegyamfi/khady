@@ -64,38 +64,26 @@ def send_bundle(receiver, bundle_amount, reference):
     print(response.text)
     return response
 
-    # url = "https://console.bestpaygh.com/api/flexi/v1/new_transaction/"
-    #
-    # headers = {
-    #     "api-key": config("API_KEY"),
-    #     "api-secret": config("API_SECRET"),
-    #     'Content-Type': 'application/json'
-    # }
-    #
-    # print("====================================")
-    # print(user.phone)
-    # print(user.first_name)
-    # print(user.last_name)
-    # print(user.email)
-    # print(receiver)
-    # print(reference)
-    # print(bundle_amount)
-    # print("=====================================")
-    #
-    # payload = json.dumps({
-    #     "first_name": user.first_name,
-    #     "last_name": user.last_name,
-    #     "account_number": f"0{user.phone}",
-    #     "receiver": receiver,
-    #     "account_email": user.email,
-    #     "reference": reference,
-    #     "bundle_amount": bundle_amount
-    # })
-    # print("------------------------------------")
-    # response = requests.request("POST", url, headers=headers, data=payload)
-    # print("yeah")
-    # print(response.json)
-    # return response
+
+def nexus_send_bundle(receiver, bundle_amount, reference):
+    url = "https://nexus.nobledatagh.com/api/send_bundle/"
+    print(receiver, bundle_amount, reference)
+
+    payload = json.dumps({
+        "phone_number": str(receiver),
+        "amount": str(bundle_amount),
+        "reference": ref_generator(10)
+    })
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': config("TOKEN_NEXUS")
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+
+    print(response.text)
+    return response
+
 
 
 def verify_paystack_transaction(reference):

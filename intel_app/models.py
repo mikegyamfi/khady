@@ -44,6 +44,11 @@ class AdminInfo(models.Model):
     )
     payment_channel = models.CharField(max_length=250, choices=choices)
     afa_price = models.FloatField(null=True, blank=True)
+    ishare_choices = (
+        ("Geosams", "Geosams"),
+        ("Nexus", "Nexus")
+    )
+    ishare_channel = models.CharField(max_length=250, choices=ishare_choices, default="Geosams")
 
 
 class IShareBundleTransaction(models.Model):
