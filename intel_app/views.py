@@ -289,8 +289,9 @@ def airtel_tigo(request):
         # print(data)
         return JsonResponse({'status': 'Transaction Completed Successfully', 'icon': 'success'})
     user = models.CustomUser.objects.get(id=request.user.id)
+    ishare_channel = models.AdminInfo.objects.get().ishare_channel
     context = {"form": form, "ref": reference, 'id': db_user_id, "email": user_email,
-               "wallet": 0 if user.wallet is None else user.wallet}
+               "wallet": 0 if user.wallet is None else user.wallet, "ishare_channel": ishare_channel}
     return render(request, "layouts/services/at.html", context=context)
 
 
