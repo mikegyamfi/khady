@@ -1014,7 +1014,7 @@ def topup_info(request):
                 return redirect(authorization_url)
             else:
                 messages.error(request, 'An error occurred while initializing payment. Please try again.')
-                return redirect('topup_info')
+                return redirect('topup-info')
         else:
             admin_phone = admin_info.phone_number if admin_info else 'ADMIN_PHONE_NUMBER'
             models.TopUpRequest.objects.create(
