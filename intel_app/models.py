@@ -49,6 +49,7 @@ class AdminInfo(models.Model):
         ("Nexus", "Nexus")
     )
     ishare_channel = models.CharField(max_length=250, choices=ishare_choices, default="Geosams")
+    paystack_active = models.BooleanField(default=False)
 
 
 class IShareBundleTransaction(models.Model):
