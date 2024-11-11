@@ -1002,6 +1002,7 @@ def topup_info(request):
             }
             response = requests.post('https://api.paystack.co/transaction/initialize', headers=headers, json=data)
             res_data = response.json()
+            print(res_data)
             if res_data.get('status'):
                 authorization_url = res_data['data']['authorization_url']
                 # Create a TopUpRequest with status Pending
