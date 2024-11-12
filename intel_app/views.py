@@ -244,51 +244,51 @@ def airtel_tigo(request):
     reference = helper.ref_generator()
     db_user_id = request.user.id
     user_email = request.user.email
-    if request.method == "POST":
-        form = forms.IShareBundleForm(data=request.POST, status=status)
-        payment_reference = request.POST.get("reference")
-        amount_paid = request.POST.get("amount")
-        new_payment = models.Payment.objects.create(
-            user=request.user,
-            reference=payment_reference,
-            amount=amount_paid,
-            transaction_date=datetime.now(),
-            transaction_status="Completed"
-        )
-        new_payment.save()
-        print("payment saved")
-        print("form valid")
-        phone_number = request.POST.get("phone")
-        offer = request.POST.get("amount")
-        print(offer)
-        if user.status == "User":
-            bundle = models.IshareBundlePrice.objects.get(price=float(offer)).bundle_volume
-        elif user.status == "Agent":
-            bundle = models.AgentIshareBundlePrice.objects.get(price=float(offer)).bundle_volume
-        elif user.status == "Super Agent":
-            bundle = models.SuperAgentIshareBundlePrice.objects.get(price=float(offer)).bundle_volume
-        else:
-            bundle = models.IshareBundlePrice.objects.get(price=float(offer)).bundle_volume
-        new_transaction = models.IShareBundleTransaction.objects.create(
-            user=request.user,
-            bundle_number=phone_number,
-            offer=f"{bundle}MB",
-            reference=payment_reference,
-            transaction_status="Pending"
-        )
-        print("created")
-        new_transaction.save()
-
-        print("===========================")
-        print(phone_number)
-        print(bundle)
-        print("--------------------")
-        # send_bundle_response = helper.send_bundle(request.user, phone_number, bundle, payment_reference)
-        # print("********************")
-        # data = send_bundle_response.json()
-        #
-        # print(data)
-        return JsonResponse({'status': 'Transaction Completed Successfully', 'icon': 'success'})
+    # if request.method == "POST":
+    #     form = forms.IShareBundleForm(data=request.POST, status=status)
+    #     payment_reference = request.POST.get("reference")
+    #     amount_paid = request.POST.get("amount")
+    #     new_payment = models.Payment.objects.create(
+    #         user=request.user,
+    #         reference=payment_reference,
+    #         amount=amount_paid,
+    #         transaction_date=datetime.now(),
+    #         transaction_status="Completed"
+    #     )
+    #     new_payment.save()
+    #     print("payment saved")
+    #     print("form valid")
+    #     phone_number = request.POST.get("phone")
+    #     offer = request.POST.get("amount")
+    #     print(offer)
+    #     if user.status == "User":
+    #         bundle = models.IshareBundlePrice.objects.get(price=float(offer)).bundle_volume
+    #     elif user.status == "Agent":
+    #         bundle = models.AgentIshareBundlePrice.objects.get(price=float(offer)).bundle_volume
+    #     elif user.status == "Super Agent":
+    #         bundle = models.SuperAgentIshareBundlePrice.objects.get(price=float(offer)).bundle_volume
+    #     else:
+    #         bundle = models.IshareBundlePrice.objects.get(price=float(offer)).bundle_volume
+    #     new_transaction = models.IShareBundleTransaction.objects.create(
+    #         user=request.user,
+    #         bundle_number=phone_number,
+    #         offer=f"{bundle}MB",
+    #         reference=payment_reference,
+    #         transaction_status="Pending"
+    #     )
+    #     print("created")
+    #     new_transaction.save()
+    #
+    #     print("===========================")
+    #     print(phone_number)
+    #     print(bundle)
+    #     print("--------------------")
+    #     # send_bundle_response = helper.send_bundle(request.user, phone_number, bundle, payment_reference)
+    #     # print("********************")
+    #     # data = send_bundle_response.json()
+    #     #
+    #     # print(data)
+    #     return JsonResponse({'status': 'Transaction Completed Successfully', 'icon': 'success'})
     user = models.CustomUser.objects.get(id=request.user.id)
     ishare_channel = models.AdminInfo.objects.get().ishare_channel
     context = {"form": form, "ref": reference, 'id': db_user_id, "email": user_email,
@@ -321,15 +321,17 @@ def mtn_pay_with_wallet(request):
         else:
             bundle = models.MTNBundlePrice.objects.get(price=float(amount)).bundle_volume
         print(bundle)
-        new_mtn_transaction = models.MTNTransaction.objects.create(
-            user=request.user,
-            bundle_number=phone_number,
-            offer=f"{bundle}MB",
-            reference=reference,
-        )
-        new_mtn_transaction.save()
-        user.wallet -= float(amount)
-        user.save()
+
+        with transaction.atomic():
+            new_mtn_transaction = models.MTNTransaction.objects.create(
+                user=request.user,
+                bundle_number=phone_number,
+                offer=f"{bundle}MB",
+                reference=reference,
+            )
+            new_mtn_transaction.save()
+            user.wallet -= float(amount)
+            user.save()
         return JsonResponse({'status': "Your transaction will be completed shortly", 'icon': 'success'})
     return redirect('mtn')
 
@@ -359,15 +361,16 @@ def big_time_pay_with_wallet(request):
         else:
             bundle = models.BigTimeBundlePrice.objects.get(price=float(amount)).bundle_volume
         print(bundle)
-        new_mtn_transaction = models.BigTimeTransaction.objects.create(
-            user=request.user,
-            bundle_number=phone_number,
-            offer=f"{bundle}MB",
-            reference=reference,
-        )
-        new_mtn_transaction.save()
-        user.wallet -= float(amount)
-        user.save()
+        with transaction.atomic():
+            new_mtn_transaction = models.BigTimeTransaction.objects.create(
+                user=request.user,
+                bundle_number=phone_number,
+                offer=f"{bundle}MB",
+                reference=reference,
+            )
+            new_mtn_transaction.save()
+            user.wallet -= float(amount)
+            user.save()
         return JsonResponse({'status': "Your transaction will be completed shortly", 'icon': 'success'})
     return redirect('big_time')
 
@@ -381,36 +384,36 @@ def mtn(request):
     reference = helper.ref_generator()
     user_email = request.user.email
 
-    if request.method == "POST":
-        payment_reference = request.POST.get("reference")
-        amount_paid = request.POST.get("amount")
-        new_payment = models.Payment.objects.create(
-            user=request.user,
-            reference=payment_reference,
-            amount=amount_paid,
-            transaction_date=datetime.now(),
-            transaction_status="Pending"
-        )
-        new_payment.save()
-        phone_number = request.POST.get("phone")
-        offer = request.POST.get("amount")
-        if user.status == "User":
-            bundle = models.MTNBundlePrice.objects.get(price=float(offer)).bundle_volume
-        elif user.status == "Agent":
-            bundle = models.AgentMTNBundlePrice.objects.get(price=float(offer)).bundle_volume
-        elif user.status == "Super Agent":
-            bundle = models.SuperAgentMTNBundlePrice.objects.get(price=float(offer)).bundle_volume
-        else:
-            bundle = models.MTNBundlePrice.objects.get(price=float(offer)).bundle_volume
-        print(phone_number)
-        new_mtn_transaction = models.MTNTransaction.objects.create(
-            user=request.user,
-            bundle_number=phone_number,
-            offer=f"{bundle}MB",
-            reference=payment_reference,
-        )
-        new_mtn_transaction.save()
-        return JsonResponse({'status': "Your transaction will be completed shortly", 'icon': 'success'})
+    # if request.method == "POST":
+    #     payment_reference = request.POST.get("reference")
+    #     amount_paid = request.POST.get("amount")
+    #     new_payment = models.Payment.objects.create(
+    #         user=request.user,
+    #         reference=payment_reference,
+    #         amount=amount_paid,
+    #         transaction_date=datetime.now(),
+    #         transaction_status="Pending"
+    #     )
+    #     new_payment.save()
+    #     phone_number = request.POST.get("phone")
+    #     offer = request.POST.get("amount")
+    #     if user.status == "User":
+    #         bundle = models.MTNBundlePrice.objects.get(price=float(offer)).bundle_volume
+    #     elif user.status == "Agent":
+    #         bundle = models.AgentMTNBundlePrice.objects.get(price=float(offer)).bundle_volume
+    #     elif user.status == "Super Agent":
+    #         bundle = models.SuperAgentMTNBundlePrice.objects.get(price=float(offer)).bundle_volume
+    #     else:
+    #         bundle = models.MTNBundlePrice.objects.get(price=float(offer)).bundle_volume
+    #     print(phone_number)
+    #     new_mtn_transaction = models.MTNTransaction.objects.create(
+    #         user=request.user,
+    #         bundle_number=phone_number,
+    #         offer=f"{bundle}MB",
+    #         reference=payment_reference,
+    #     )
+    #     new_mtn_transaction.save()
+    #     return JsonResponse({'status': "Your transaction will be completed shortly", 'icon': 'success'})
     user = models.CustomUser.objects.get(id=request.user.id)
     phone_num = user.phone
     mtn_dict = {}
