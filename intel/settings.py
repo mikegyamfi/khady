@@ -31,7 +31,8 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'www.ghbays.com',
     'gh-bay-mttrt.ondigitalocean.app',
-    '127.0.0.1'
+    '127.0.0.1',
+    'gh-bay-yaiye.ondigitalocean.app'
 ]
 
 
