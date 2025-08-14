@@ -17,7 +17,6 @@ from decouple import config
 BASE_DIR = Path(__file__).resolve().parent.parent
 TEMPLATE_DIR = BASE_DIR / 'intel_app/templates'
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
@@ -34,7 +33,6 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     'gh-bay-yaiye.ondigitalocean.app'
 ]
-
 
 # Application definition
 
@@ -96,7 +94,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'intel.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
@@ -139,7 +136,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
@@ -150,7 +146,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
@@ -167,12 +162,12 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'intel_app/media')
 AUTH_USER_MODEL = 'intel_app.CustomUser'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
 AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
-
+AWS_S3_REGION_NAME = "nyc3"
 AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY")
-
+AWS_S3_CUSTOM_DOMAIN = "ghbayspace.nyc3.digitaloceanspaces.com"
 AWS_STORAGE_BUCKET_NAME = config("AWS_STORAGE_BUCKET_NAME")
+AWS_QUERYSTRING_AUTH = False
 
 AWS_S3_ENDPOINT_URL = config("AWS_S3_ENDPOINT_URL")
 
@@ -185,6 +180,5 @@ AWS_DEFAULT_ACL = 'public-read'
 AWS_LOCATION = config("AWS_LOCATION")
 
 MEDIA_LOCATION = 'media'
-MEDIA_URL = 'https://%s/%s/' % (AWS_S3_ENDPOINT_URL, AWS_LOCATION)
+MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/"
 DEFAULT_FILE_STORAGE = 'custom_storages.MediaStorage'
-
